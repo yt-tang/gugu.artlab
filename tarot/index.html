@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUGU ART LAB</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav>
+                <div class="fountain-art" aria-hidden="true">
+                    <img src="images/豆包.png" alt="">
+                </div>
+                <div class="logo">GUGU ART LAB</div>
+                <div class="subtitle">Inner soul reading</div>
+                <div class="lang-toggle" id="lang-toggle">
+                    <button type="button" class="lang-btn" data-lang="zh">中文</button>
+                    <button type="button" class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#" id="nav-home" onclick="showPage(event, 'home')" class="active">首页</a></li>
+                    <li><a href="#" id="nav-manual" onclick="showPage(event, 'manual')">塔罗手册</a></li>
+                    <li><a href="#" id="nav-course" onclick="showPage(event, 'course')">加入魔法世界</a></li>
+                    <li><a href="#" id="nav-booking" onclick="showPage(event, 'booking')">预约资讯</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section id="page-home" class="page active">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1>TAROT READING</h1>
+                        <p class="hero-subtitle" id="home-subtitle">你没有卡在任何地方，你只是在体验各种能量</p>
+                        <div class="reading-form" id="reading-form">
+                            <div class="form-group">
+                                <label for="spread-type" id="spread-label">Select Spread</label>
+                                <select id="spread-type" required>
+                                    <option value="daily">1 Card - Daily Guidance</option>
+                                    <option value="choice">2 Cards - Choice Spread</option>
+                                    <option value="timeline">3 Cards - Timeline Spread</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="choice-inputs" style="display:none;">
+                                <label for="choice-a" id="choices-label">Two Options</label>
+                                <div class="choice-grid">
+                                    <input type="text" id="choice-a" placeholder="Option A (e.g., Job A)">
+                                    <input type="text" id="choice-b" placeholder="Option B (e.g., Job B)">
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="question-group">
+                                <label for="reading-question" id="question-label">Your Question</label>
+                                <textarea id="reading-question" rows="3" placeholder="e.g., How will this situation develop?"></textarea>
+                            </div>
+
+                            <button type="button" id="start-reading" class="btn-submit">Shuffle & Draw</button>
+                        </div>
+
+                        <div id="reading-result" class="reading-result" style="display:none;">
+                            <div class="cards-grid reading-cards" id="reading-cards"></div>
+                            <div class="reading-analysis" id="reading-analysis"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-card framed">
+                        <h3 id="feature-1-title">完整塔罗手册</h3>
+                        <p id="feature-1-desc">78张塔罗牌详细解读，包含大阿卡纳和小阿卡纳</p>
+                    </div>
+                    <div class="feature-card framed">
+                        <h3 id="feature-2-title">正逆位解析</h3>
+                        <p id="feature-2-desc">每张牌的正位和逆位完整含义，助你深入学习</p>
+                    </div>
+                    <div class="feature-card framed">
+                        <h3 id="feature-3-title">1对1咨询</h3>
+                        <p id="feature-3-desc">专业塔罗师为你提供一对一详细解读服务</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-manual" class="page">
+                <div class="manual-header">
+                    <h2 id="manual-title">TAROT MANUAL</h2>
+                    <div class="manual-tabs">
+                        <button onclick="showArcana('major')" class="tab-btn active" id="tab-major">大阿卡纳 (22张)</button>
+                        <button onclick="showArcana('minor')" class="tab-btn" id="tab-minor">小阿卡纳 (56张)</button>
+                    </div>
+                </div>
+                
+                <div id="arcana-major" class="arcana-container active">
+                    <div class="cards-grid" id="major-cards"></div>
+                </div>
+                
+                <div id="arcana-minor" class="arcana-container">
+                    <div class="suits-nav">
+                        <button onclick="showSuit('wands')" class="suit-btn" id="suit-wands">权杖</button>
+                        <button onclick="showSuit('cups')" class="suit-btn" id="suit-cups">圣杯</button>
+                        <button onclick="showSuit('swords')" class="suit-btn" id="suit-swords">宝剑</button>
+                        <button onclick="showSuit('pentacles')" class="suit-btn" id="suit-pentacles">星币</button>
+                    </div>
+                    <p class="suit-desc" id="suit-desc"></p>
+                    <div class="cards-grid" id="minor-cards"></div>
+                </div>
+            </section>
+
+            <section id="page-course" class="page">
+                <div class="booking-container course-container">
+                    <h2 id="course-title">加入魔法世界</h2>
+
+                    <div class="course-grid">
+                        <div class="booking-form course-panel">
+                            <h3 id="course-videos-title">塔罗入门影片</h3>
+                            <p class="booking-desc course-desc" id="course-desc">请输入 code 进入课程页面</p>
+                            <div class="form-group">
+                                <label for="course-code" id="course-code-label">Course Code</label>
+                                <input type="password" id="course-code" placeholder="">
+                            </div>
+                            <button type="button" class="btn-submit" id="course-enter">Enter</button>
+                            <div class="course-placeholder" id="course-placeholder" style="display:none;"></div>
+                        </div>
+
+                        <div class="booking-form course-panel">
+                            <h3 id="course-1on1-title">1对1专属</h3>
+                            <p id="course-1on1-desc">预约后请按时加入线上视频。</p>
+                            <a class="btn-secondary extra-btn" id="course-1on1-link" href="https://meet.google.com/new" target="_blank" rel="noopener">视讯链接</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="page-booking" class="page">
+                <div class="booking-container">
+                    <h2 id="booking-title">BOOKING</h2>
+                    <p class="booking-desc" id="booking-desc">填写以下表单，我们将尽快与您联系</p>
+                    
+                    <form class="booking-form" onsubmit="handleBooking(event)">
+                        <div class="form-group">
+                            <label for="name" id="label-name">姓名</label>
+                            <input type="text" id="name" required placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" id="label-phone">联系电话</label>
+                            <input type="tel" id="phone" required placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" id="label-email">电子邮箱</label>
+                            <input type="email" id="email" required placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="consult-type" id="label-consult-type">咨询类型</label>
+                            <select id="consult-type" required>
+                                <option value="" id="consult-placeholder">请选择咨询类型</option>
+                                <option value="career">个人成长类</option>
+                                <option value="love">情感与关系类</option>
+                                <option value="finance">财运事业</option>
+                                <option value="health">身心健康类</option>
+                                <option value="general">流年运势</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message" id="label-message">备注信息</label>
+                            <textarea id="message" rows="4" placeholder=""></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-submit" id="booking-submit">提交预约</button>
+                    </form>
+                    
+                    <div class="contact-info">
+                        <div class="service-info" id="service-info">
+                            <div class="service-top">
+                                <h3 id="service-top-title">塔罗 / 占星术</h3>
+                                <p id="service-top-desc">选取任何课程即可免费加入付费群</p>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-1-title">1 对 1 客制化占卜课程</h4>
+                                <p id="service-1-desc">专属 1 对 1・私人定制・按你需求设计占卜方式，赠送适合您的塔罗牌/神谕卡</p>
+                                <p id="service-1-fit">适合：想系统学习、希望量身打造学习路径、追求个人化指导的你。</p>
+                                <a class="btn-secondary extra-btn" id="service-1-btn" href="https://wa.me/60127710829" target="_blank" rel="noopener">WhatsApp</a>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-2-title">塔罗入门影片</h4>
+                                <p id="service-2-desc">随时随地学习・零基础友好・轻松入门塔罗</p>
+                                <p id="service-2-fit">适合：对塔罗感兴趣、想自学基础、时间弹性的初学者。</p>
+                                <a class="btn-secondary extra-btn" id="service-2-btn" href="https://wa.me/60127710829" target="_blank" rel="noopener">WhatsApp</a>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-3-title">付费占卜交流群（年度）</h4>
+                                <p id="service-3-price">USD 25 / 年</p>
+                                <p id="service-3-fit">适合：已有塔罗基础，想要进阶实战、深入解析复杂问题、同频交流、自我提升与修心的伙伴。</p>
+                                <p id="service-3-desc">一起研讨案例、练习解牌、互相反馈，共同成长。</p>
+                                <a class="btn-secondary extra-btn" id="service-3-btn" href="https://chat.whatsapp.com/JMKlfNT4ZW6BmaYmx2wNza?mode=gi_t" target="_blank" rel="noopener">Link</a>
+                            </div>
+                            <p class="service-note" id="service-note">想了解更多或报名，请通过 WhatsApp 联络我们。</p>
+                        </div>
+
+                        <h3 id="contact-title">联络方式</h3>
+                        <div class="contact-item">
+                            <span id="contact-phone">电话/WhatsApp：+60127710829</span>
+                        </div>
+                        <div class="contact-item">
+                            <span id="contact-email">邮箱：ycommunitystudio@gmail.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span id="contact-ig">Instagram：@gugu.artlab</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 GUGU ART LAB. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="card-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
