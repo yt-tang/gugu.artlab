@@ -3,513 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GUGU VINTAGE ART LAB - 测算中心</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f3f1ec;
-            --text-main: #3a3a3a;
-            --text-secondary: #6b6b6b;
-            --accent-color: #8c7e6a;
-            --border-color: #dcd9d2;
-        }
-        body {
-            font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-        .logo-container {
-            max-width: 180px;
-            margin: 40px auto;
-            opacity: 0.9;
-        }
-        .section-title {
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            color: var(--text-main);
-            border-bottom: 1px solid var(--border-color);
-            display: inline-block;
-            padding-bottom: 0.5rem;
-        }
-        .card {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            transition: all 0.4s ease;
-            padding: 2.5rem;
-        }
-        .card:hover {
-            border-color: var(--accent-color);
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .input-field {
-            background: transparent;
-            border-bottom: 1px solid var(--border-color);
-            width: 100%;
-            padding: 0.75rem 0;
-            outline: none;
-            transition: border-color 0.3s;
-            font-family: 'Noto Serif SC', serif;
-            font-size: 0.9rem;
-        }
-        .input-field:focus {
-            border-color: var(--accent-color);
-        }
-        .action-btn {
-            margin-top: 2rem;
-            padding: 0.75rem 2rem;
-            border: 1px solid var(--text-main);
-            background: transparent;
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .action-btn:hover {
-            background: var(--text-main);
-            color: var(--bg-color);
-        }
-        
-        /* Tarot Shuffle Animation */
-        .tarot-deck {
-            position: relative;
-            height: 180px;
-            width: 120px;
-            margin: 2rem auto;
-        }
-        .tarot-card-inner {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 1px solid var(--accent-color);
-            background: #fff;
-            border-radius: 4px;
-            transition: all 0.5s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            color: var(--accent-color);
-        }
-        .shuffling .tarot-card-inner {
-            animation: shuffle 0.6s infinite alternate;
-        }
-        @keyframes shuffle {
-            from { transform: translateX(-20px) rotate(-5deg); }
-            to { transform: translateX(20px) rotate(5deg); }
-        }
-
-        /* Result Area */
-        #result-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(243, 241, 236, 0.98);
-            z-index: 2000;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-        .result-content {
-            max-width: 600px;
-            margin: 4rem auto;
-            text-align: left;
-        }
-        .ai-badge {
-            font-size: 0.7rem;
-            border: 1px solid var(--accent-color);
-            padding: 2px 8px;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
-        .fade-in {
-            animation: fadeIn 1s ease forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Card Image Simulation */
-        .tarot-card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 4px;
-            filter: sepia(0.2) contrast(1.1);
-        }
-        .card-placeholder {
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-        .tarot-img-crop {
-            width: 100%;
-            height: 100%;
-            background-size: 500% 300%; /* 默认假设 5x3 的网格，后续根据具体图片调整 */
-            background-repeat: no-repeat;
-        }
-        /* 大牌网格 (假设 tarot5.jpg 是 7x3) */
-        .img-major { background-size: 700% 300%; }
-        /* 小牌网格 (假设 tarot1-4.jpg 是 5x3 或 4x4) */
-        .img-minor { background-size: 500% 300%; }
-    </style>
+    <title>GUGU ART LAB</title>
+    <link rel="stylesheet" href="tarot/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen p-4 md:p-12">
-    <!-- Header/Logo Area -->
-    <header class="text-center mb-16">
-        <div class="logo-container">
-            <!-- Using the user's uploaded image if available, else a placeholder -->
-            <img src="logo.png" alt="GUGU Logo" class="w-full h-auto mb-4" onerror="this.src='https://via.placeholder.com/150x150?text=GUGU+LOGO'">
-        </div>
-        <p class="text-sm tracking-[0.3em] text-gray-500 uppercase">Vintage . Art Lab</p>
-    </header>
+<body>
+    <div id="app">
+        <header>
+            <nav>
+                <div class="fountain-art" aria-hidden="true">
+                    <img src="tarot/images/豆包.png" alt="">
+                </div>
+                <div class="logo">GUGU ART LAB</div>
+                <div class="subtitle">Inner soul reading</div>
+                <div class="lang-toggle" id="lang-toggle">
+                    <button type="button" class="lang-btn" data-lang="zh">中文</button>
+                    <button type="button" class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#" id="nav-home" onclick="showPage(event, 'home')" class="active">首页</a></li>
+                    <li><a href="#" id="nav-manual" onclick="showPage(event, 'manual')">塔罗手册</a></li>
+                    <li><a href="#" id="nav-course" onclick="showPage(event, 'course')">加入魔法世界</a></li>
+                    <li><a href="#" id="nav-booking" onclick="showPage(event, 'booking')">预约资讯</a></li>
+                </ul>
+            </nav>
+        </header>
 
-    <main class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            
-            <!-- Astrology -->
-            <section class="flex flex-col items-center">
-                <h2 class="section-title">Birth Chart</h2>
-                <div class="card w-full">
-                    <p class="text-xs text-gray-500 mb-6 italic">探寻星辰指引的生命轨迹</p>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-400">Date of Birth</label>
-                            <input type="datetime-local" id="astro-dt" class="input-field" value="1995-01-01T12:00">
+        <main>
+            <section id="page-home" class="page active">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1>TAROT READING</h1>
+                        <p class="hero-subtitle" id="home-subtitle">你没有卡在任何地方，你只是在体验各种能量</p>
+                        <div class="reading-form" id="reading-form">
+                            <div class="form-group">
+                                <label for="spread-type" id="spread-label">Select Spread</label>
+                                <select id="spread-type" required>
+                                    <option value="daily">1 Card - Daily Guidance</option>
+                                    <option value="choice">2 Cards - Choice Spread</option>
+                                    <option value="timeline">3 Cards - Timeline Spread</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="choice-inputs" style="display:none;">
+                                <label for="choice-a" id="choices-label">Two Options</label>
+                                <div class="choice-grid">
+                                    <input type="text" id="choice-a" placeholder="Option A (e.g., Job A)">
+                                    <input type="text" id="choice-b" placeholder="Option B (e.g., Job B)">
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="question-group">
+                                <label for="reading-question" id="question-label">Your Question</label>
+                                <textarea id="reading-question" rows="3" placeholder="e.g., How will this situation develop?"></textarea>
+                            </div>
+
+                            <button type="button" id="start-reading" class="btn-submit">Shuffle & Draw</button>
                         </div>
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-400">City of Birth</label>
-                            <input type="text" id="astro-loc" class="input-field" placeholder="Beijing, China">
+
+                        <div id="reading-result" class="reading-result" style="display:none;">
+                            <div class="cards-grid reading-cards" id="reading-cards"></div>
+                            <div class="reading-analysis" id="reading-analysis"></div>
                         </div>
-                        <button onclick="runAstro()" class="action-btn w-full">生成解读</button>
+                    </div>
+                </div>
+                
+                <div class="features">
+                    <div class="feature-card framed">
+                        <h3 id="feature-1-title">完整塔罗手册</h3>
+                        <p id="feature-1-desc">78张塔罗牌详细解读，包含大阿卡纳和小阿卡纳</p>
+                    </div>
+                    <div class="feature-card framed">
+                        <h3 id="feature-2-title">正逆位解析</h3>
+                        <p id="feature-2-desc">每张牌的正位和逆位完整含义，助你深入学习</p>
+                    </div>
+                    <div class="feature-card framed">
+                        <h3 id="feature-3-title">1对1咨询</h3>
+                        <p id="feature-3-desc">专业塔罗师为你提供一对一详细解读服务</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Tarot -->
-            <section class="flex flex-col items-center">
-                <h2 class="section-title">Tarot Reading</h2>
-                <div class="card w-full text-center">
-                    <p class="text-xs text-gray-500 mb-4 italic">翻开时空的隐喻</p>
-                    <div id="tarot-area">
-                        <div class="tarot-deck" id="tarot-deck">
-                            <div class="tarot-card-inner" style="z-index:3; transform: rotate(-2deg)">GUGU</div>
-                            <div class="tarot-card-inner" style="z-index:2; transform: rotate(0deg)">VINTAGE</div>
-                            <div class="tarot-card-inner" style="z-index:1; transform: rotate(2deg)">ART LAB</div>
+            <section id="page-manual" class="page">
+                <div class="manual-header">
+                    <h2 id="manual-title">TAROT MANUAL</h2>
+                    <div class="manual-tabs">
+                        <button onclick="showArcana('major')" class="tab-btn active" id="tab-major">大阿卡纳 (22张)</button>
+                        <button onclick="showArcana('minor')" class="tab-btn" id="tab-minor">小阿卡纳 (56张)</button>
+                    </div>
+                </div>
+                
+                <div id="arcana-major" class="arcana-container active">
+                    <div class="cards-grid" id="major-cards"></div>
+                </div>
+                
+                <div id="arcana-minor" class="arcana-container">
+                    <div class="suits-nav">
+                        <button onclick="showSuit('wands')" class="suit-btn" id="suit-wands">权杖</button>
+                        <button onclick="showSuit('cups')" class="suit-btn" id="suit-cups">圣杯</button>
+                        <button onclick="showSuit('swords')" class="suit-btn" id="suit-swords">宝剑</button>
+                        <button onclick="showSuit('pentacles')" class="suit-btn" id="suit-pentacles">星币</button>
+                    </div>
+                    <p class="suit-desc" id="suit-desc"></p>
+                    <div class="cards-grid" id="minor-cards"></div>
+                </div>
+            </section>
+
+            <section id="page-course" class="page">
+                <div class="booking-container course-container">
+                    <h2 id="course-title">加入魔法世界</h2>
+
+                    <div class="course-grid">
+                        <div class="booking-form course-panel">
+                            <h3 id="course-videos-title">塔罗入门影片</h3>
+                            <p class="booking-desc course-desc" id="course-desc">请输入 code 进入课程页面</p>
+                            <div class="form-group">
+                                <label for="course-code" id="course-code-label">Course Code</label>
+                                <input type="password" id="course-code" placeholder="">
+                            </div>
+                            <button type="button" class="btn-submit" id="course-enter">Enter</button>
+                            <div class="course-placeholder" id="course-placeholder" style="display:none;"></div>
                         </div>
-                        <select id="tarot-topic" class="input-field mb-6 text-center">
-                            <option value="love">关于情感</option>
-                            <option value="career">关于事业</option>
-                            <option value="daily">每日指引</option>
-                        </select>
-                        <button onclick="runTarot()" id="tarot-btn" class="action-btn w-full">开始洗牌</button>
+
+                        <div class="booking-form course-panel">
+                            <h3 id="course-1on1-title">1对1专属</h3>
+                            <p id="course-1on1-desc">预约后请按时加入线上视频。</p>
+                            <a class="btn-secondary extra-btn" id="course-1on1-link" href="https://meet.google.com/new" target="_blank" rel="noopener">视讯链接</a>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Bazi -->
-            <section class="flex flex-col items-center">
-                <h2 class="section-title">Eight Characters</h2>
-                <div class="card w-full">
-                    <p class="text-xs text-gray-500 mb-6 italic">五行流转中的命运格局</p>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-400">Time of Birth</label>
-                            <input type="datetime-local" id="bazi-dt" class="input-field" value="1995-01-01T12:00">
+            <section id="page-booking" class="page">
+                <div class="booking-container">
+                    <h2 id="booking-title">BOOKING</h2>
+                    <p class="booking-desc" id="booking-desc">填写以下表单，我们将尽快与您联系</p>
+                    
+                    <form class="booking-form" onsubmit="handleBooking(event)">
+                        <div class="form-group">
+                            <label for="name" id="label-name">姓名</label>
+                            <input type="text" id="name" required placeholder="">
                         </div>
-                        <div class="flex gap-8 justify-center py-2">
-                            <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                                <input type="radio" name="gender" value="male" class="accent-[#8c7e6a]" checked>
-                                <span>乾 (男)</span>
-                            </label>
-                            <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                                <input type="radio" name="gender" value="female" class="accent-[#8c7e6a]">
-                                <span>坤 (女)</span>
-                            </label>
+                        
+                        <div class="form-group">
+                            <label for="phone" id="label-phone">联系电话</label>
+                            <input type="tel" id="phone" required placeholder="">
                         </div>
-                        <button onclick="runBazi()" class="action-btn w-full">测算八字</button>
+                        
+                        <div class="form-group">
+                            <label for="email" id="label-email">电子邮箱</label>
+                            <input type="email" id="email" required placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="consult-type" id="label-consult-type">咨询类型</label>
+                            <select id="consult-type" required>
+                                <option value="" id="consult-placeholder">请选择咨询类型</option>
+                                <option value="career">个人成长类</option>
+                                <option value="love">情感与关系类</option>
+                                <option value="finance">财运事业</option>
+                                <option value="health">身心健康类</option>
+                                <option value="general">流年运势</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message" id="label-message">备注信息</label>
+                            <textarea id="message" rows="4" placeholder=""></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-submit" id="booking-submit">提交预约</button>
+                    </form>
+                    
+                    <div class="contact-info">
+                        <div class="service-info" id="service-info">
+                            <div class="service-top">
+                                <h3 id="service-top-title">塔罗 / 占星术</h3>
+                                <p id="service-top-desc">选取任何课程即可免费加入付费群</p>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-1-title">1 对 1 客制化占卜课程</h4>
+                                <p id="service-1-desc">专属 1 对 1・私人定制・按你需求设计占卜方式，赠送适合您的塔罗牌/神谕卡</p>
+                                <p id="service-1-fit">适合：想系统学习、希望量身打造学习路径、追求个人化指导的你。</p>
+                                <a class="btn-secondary extra-btn" id="service-1-btn" href="https://wa.me/60127710829" target="_blank" rel="noopener">WhatsApp</a>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-2-title">塔罗入门影片</h4>
+                                <p id="service-2-desc">随时随地学习・零基础友好・轻松入门塔罗</p>
+                                <p id="service-2-fit">适合：对塔罗感兴趣、想自学基础、时间弹性的初学者。</p>
+                                <a class="btn-secondary extra-btn" id="service-2-btn" href="https://wa.me/60127710829" target="_blank" rel="noopener">WhatsApp</a>
+                            </div>
+
+                            <div class="service-item">
+                                <h4 id="service-3-title">付费占卜交流群（年度）</h4>
+                                <p id="service-3-price">USD 25 / 年</p>
+                                <p id="service-3-fit">适合：已有塔罗基础，想要进阶实战、深入解析复杂问题、同频交流、自我提升与修心的伙伴。</p>
+                                <p id="service-3-desc">一起研讨案例、练习解牌、互相反馈，共同成长。</p>
+                                <a class="btn-secondary extra-btn" id="service-3-btn" href="https://chat.whatsapp.com/JMKlfNT4ZW6BmaYmx2wNza?mode=gi_t" target="_blank" rel="noopener">Link</a>
+                            </div>
+                            <p class="service-note" id="service-note">想了解更多或报名，请通过 WhatsApp 联络我们。</p>
+                        </div>
+
+                        <h3 id="contact-title">联络方式</h3>
+                        <div class="contact-item">
+                            <span id="contact-phone">电话/WhatsApp：+60127710829</span>
+                        </div>
+                        <div class="contact-item">
+                            <span id="contact-email">邮箱：ycommunitystudio@gmail.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span id="contact-ig">Instagram：@gugu.artlab</span>
+                        </div>
                     </div>
                 </div>
             </section>
+        </main>
 
-        </div>
-    </main>
+        <footer>
+            <p>&copy; 2024 GUGU ART LAB. All rights reserved.</p>
+        </footer>
+    </div>
 
-    <!-- Result Modal (Doubao Simulation) -->
-    <div id="result-modal">
-        <div class="result-content">
-            <div class="flex justify-between items-center mb-12">
-                <button onclick="closeResult()" class="text-xs uppercase tracking-widest hover:text-accent-color">← Back</button>
-                <button id="copy-to-doubao" class="text-[10px] uppercase tracking-widest border border-accent-color px-3 py-1 hover:bg-accent-color hover:text-white transition-all">
-                    复制并前往豆包 AI
-                </button>
-            </div>
-            <div id="ai-response" class="fade-in">
-                <span class="ai-badge">Doubao AI Interpretation</span>
-                <h3 id="result-title" class="text-2xl mb-6">解读报告</h3>
-                <div id="result-text" class="text-sm leading-relaxed space-y-4 text-gray-600">
-                    <!-- Dynamic content -->
-                </div>
-            </div>
+    <div id="card-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <div id="modal-body"></div>
         </div>
     </div>
 
-    <footer class="mt-32 text-center text-[10px] uppercase tracking-[0.3em] text-gray-400 pb-12">
-        <p>&copy; 2026 GUGU VINTAGE ART LAB. ALL RIGHTS RESERVED.</p>
-    </footer>
-
-    <script>
-        // API 设置 (明天请将您的 API Key 替换到此处)
-        const DOUBAO_API_KEY = "「你的实际密钥」"; 
-        const DOUBAO_ENDPOINT = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
-
-        const TAROT_DECK = [
-            // 大牌 (Major Arcana) - 对应 tarot5.jpg
-            { name: "愚者 (The Fool)", id: "major_0", img: "tarot5.jpg", x: 6, y: 0 },
-            { name: "魔术师 (The Magician)", id: "major_1", img: "tarot5.jpg", x: 0, y: 0 },
-            { name: "女祭司 (The High Priestess)", id: "major_2", img: "tarot5.jpg", x: 1, y: 0 },
-            { name: "皇后 (The Empress)", id: "major_3", img: "tarot5.jpg", x: 2, y: 0 },
-            { name: "皇帝 (The Emperor)", id: "major_4", img: "tarot5.jpg", x: 3, y: 0 },
-            { name: "教皇 (The Hierophant)", id: "major_5", img: "tarot5.jpg", x: 4, y: 0 },
-            { name: "恋人 (The Lovers)", id: "major_6", img: "tarot5.jpg", x: 5, y: 0 },
-            { name: "战车 (The Chariot)", id: "major_7", img: "tarot5.jpg", x: 6, y: 0 }, // 示例重复，需根据实际位置调整
-            { name: "正义 (Justice)", id: "major_8", img: "tarot5.jpg", x: 0, y: 1 },
-            { name: "隐士 (The Hermit)", id: "major_9", img: "tarot5.jpg", x: 1, y: 1 },
-            { name: "命运之轮 (Wheel of Fortune)", id: "major_10", img: "tarot5.jpg", x: 2, y: 1 },
-            { name: "力量 (Strength)", id: "major_11", img: "tarot5.jpg", x: 3, y: 1 },
-            { name: "倒吊人 (The Hanged Man)", id: "major_12", img: "tarot5.jpg", x: 4, y: 1 },
-            { name: "死亡 (Death)", id: "major_13", img: "tarot5.jpg", x: 5, y: 1 },
-            { name: "节制 (Temperance)", id: "major_14", img: "tarot5.jpg", x: 6, y: 1 },
-            { name: "恶魔 (The Devil)", id: "major_15", img: "tarot5.jpg", x: 0, y: 2 },
-            { name: "高塔 (The Tower)", id: "major_16", img: "tarot5.jpg", x: 1, y: 2 },
-            { name: "星星 (The Star)", id: "major_17", img: "tarot5.jpg", x: 2, y: 2 },
-            { name: "月亮 (The Moon)", id: "major_18", img: "tarot5.jpg", x: 3, y: 2 },
-            { name: "太阳 (The Sun)", id: "major_19", img: "tarot5.jpg", x: 4, y: 2 },
-            { name: "审判 (Judgement)", id: "major_20", img: "tarot5.jpg", x: 5, y: 2 },
-            { name: "世界 (The World)", id: "major_21", img: "tarot5.jpg", x: 6, y: 2 },
-
-            // 圣杯 (Cups) - 对应 tarot1.jpg
-            { name: "圣杯一", id: "cups_1", img: "tarot1.jpg", x: 0, y: 0 },
-            { name: "圣杯二", id: "cups_2", img: "tarot1.jpg", x: 1, y: 0 },
-            { name: "圣杯三", id: "cups_3", img: "tarot1.jpg", x: 2, y: 0 },
-            { name: "圣杯四", id: "cups_4", img: "tarot1.jpg", x: 3, y: 0 },
-            { name: "圣杯五", id: "cups_5", img: "tarot1.jpg", x: 4, y: 0 },
-            { name: "圣杯六", id: "cups_6", img: "tarot1.jpg", x: 0, y: 1 },
-            { name: "圣杯七", id: "cups_7", img: "tarot1.jpg", x: 1, y: 1 },
-            { name: "圣杯八", id: "cups_8", img: "tarot1.jpg", x: 2, y: 1 },
-            { name: "圣杯九", id: "cups_9", img: "tarot1.jpg", x: 3, y: 1 },
-            { name: "圣杯十", id: "cups_10", img: "tarot1.jpg", x: 4, y: 1 },
-            { name: "圣杯骑士", id: "cups_knight", img: "tarot1.jpg", x: 0, y: 2 },
-            { name: "圣杯侍从", id: "cups_page", img: "tarot1.jpg", x: 1, y: 2 },
-            { name: "圣杯王后", id: "cups_queen", img: "tarot1.jpg", x: 2, y: 2 },
-            { name: "圣杯国王", id: "cups_king", img: "tarot1.jpg", x: 3, y: 2 },
-
-            // 权杖 (Wands) - 对应 tarot2.jpg
-            { name: "权杖一", id: "wands_1", img: "tarot2.jpg", x: 0, y: 0 },
-            { name: "权杖二", id: "wands_2", img: "tarot2.jpg", x: 1, y: 0 },
-            { name: "权杖三", id: "wands_3", img: "tarot2.jpg", x: 2, y: 0 },
-            { name: "权杖四", id: "wands_4", img: "tarot2.jpg", x: 3, y: 0 },
-            { name: "权杖五", id: "wands_5", img: "tarot2.jpg", x: 4, y: 0 },
-            { name: "权杖六", id: "wands_6", img: "tarot2.jpg", x: 0, y: 1 },
-            { name: "权杖七", id: "wands_7", img: "tarot2.jpg", x: 1, y: 1 },
-            { name: "权杖八", id: "wands_8", img: "tarot2.jpg", x: 2, y: 1 },
-            { name: "权杖九", id: "wands_9", img: "tarot2.jpg", x: 3, y: 1 },
-            { name: "权杖十", id: "wands_10", img: "tarot2.jpg", x: 4, y: 1 },
-            { name: "权杖骑士", id: "wands_knight", img: "tarot2.jpg", x: 0, y: 2 },
-            { name: "权杖侍从", id: "wands_page", img: "tarot2.jpg", x: 1, y: 2 },
-            { name: "权杖王后", id: "wands_queen", img: "tarot2.jpg", x: 2, y: 2 },
-            { name: "权杖国王", id: "wands_king", img: "tarot2.jpg", x: 3, y: 2 },
-
-            // 金币 (Pentacles) - 对应 tarot3.jpg
-            { name: "金币一", id: "pentacles_1", img: "tarot3.jpg", x: 0, y: 0 },
-            { name: "金币二", id: "pentacles_2", img: "tarot3.jpg", x: 1, y: 0 },
-            { name: "金币三", id: "pentacles_3", img: "tarot3.jpg", x: 2, y: 0 },
-            { name: "金币四", id: "pentacles_4", img: "tarot3.jpg", x: 3, y: 0 },
-            { name: "金币五", id: "pentacles_5", img: "tarot3.jpg", x: 4, y: 0 },
-            { name: "金币六", id: "pentacles_6", img: "tarot3.jpg", x: 0, y: 1 },
-            { name: "金币七", id: "pentacles_7", img: "tarot3.jpg", x: 1, y: 1 },
-            { name: "金币八", id: "pentacles_8", img: "tarot3.jpg", x: 2, y: 1 },
-            { name: "金币九", id: "pentacles_9", img: "tarot3.jpg", x: 3, y: 1 },
-            { name: "金币十", id: "pentacles_10", img: "tarot3.jpg", x: 4, y: 1 },
-            { name: "金币骑士", id: "pentacles_knight", img: "tarot3.jpg", x: 0, y: 2 },
-            { name: "金币侍从", id: "pentacles_page", img: "tarot3.jpg", x: 1, y: 2 },
-            { name: "金币王后", id: "pentacles_queen", img: "tarot3.jpg", x: 2, y: 2 },
-            { name: "金币国王", id: "pentacles_king", img: "tarot3.jpg", x: 3, y: 2 },
-
-            // 宝剑 (Swords) - 对应 tarot4.jpg
-            { name: "宝剑一", id: "swords_1", img: "tarot4.jpg", x: 0, y: 0 },
-            { name: "宝剑二", id: "swords_2", img: "tarot4.jpg", x: 1, y: 0 },
-            { name: "宝剑三", id: "swords_3", img: "tarot4.jpg", x: 2, y: 0 },
-            { name: "宝剑四", id: "swords_4", img: "tarot4.jpg", x: 3, y: 0 },
-            { name: "宝剑五", id: "swords_5", id: "swords_5", img: "tarot4.jpg", x: 4, y: 0 },
-            { name: "宝剑六", id: "swords_6", img: "tarot4.jpg", x: 0, y: 1 },
-            { name: "宝剑七", id: "swords_7", img: "tarot4.jpg", x: 1, y: 1 },
-            { name: "宝剑八", id: "swords_8", img: "tarot4.jpg", x: 2, y: 1 },
-            { name: "宝剑九", id: "swords_9", img: "tarot4.jpg", x: 3, y: 1 },
-            { name: "宝剑十", id: "swords_10", img: "tarot4.jpg", x: 4, y: 1 },
-            { name: "宝剑骑士", id: "swords_knight", img: "tarot4.jpg", x: 0, y: 2 },
-            { name: "宝剑侍从", id: "swords_page", img: "tarot4.jpg", x: 1, y: 2 },
-            { name: "宝剑王后", id: "swords_queen", img: "tarot4.jpg", x: 2, y: 2 },
-            { name: "宝剑国王", id: "swords_king", img: "tarot4.jpg", x: 3, y: 2 }
-        ];
-
-        let currentPrompt = "";
-
-        async function callDoubaoAI(prompt) {
-            if (DOUBAO_API_KEY === "「你的实际密钥」") {
-                return "AI 密钥尚未配置，请明天在代码中填入密钥后即可开启自动解牌功能。";
-            }
-            try {
-                const response = await fetch(DOUBAO_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${DOUBAO_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: "doubao-pro-4k", // 这里的模型 ID 可能需要根据您的具体账号调整
-                        messages: [
-                            { role: "system", content: "你是一位资深的塔罗占卜师，风格简约、自然、富有艺术感，擅长结合 GUGU VINTAGE ART LAB 的氛围进行解读。" },
-                            { role: "user", content: prompt }
-                        ]
-                    })
-                });
-                const data = await response.json();
-                return data.choices[0].message.content;
-            } catch (error) {
-                console.error("AI调用失败:", error);
-                return "抱歉，由于连接星际算法中心失败，暂时无法为您解读。请检查网络或 API 密钥。";
-            }
-        }
-
-        async function runAstro() {
-            const dt = document.getElementById('astro-dt').value;
-            const loc = document.getElementById('astro-loc').value;
-            currentPrompt = `你好豆包，我出生于 ${dt}，出生地是 ${loc}。请帮我分析我的个人星盘，并结合 GUGU VINTAGE ART LAB 的艺术氛围，给出我的性格、天赋与生命轨迹的解读。`;
-            
-            showResult('个人星盘解读', '<p class="animate-pulse">正在连通星盘数据，豆包 AI 正在思考中...</p>');
-            const aiInterpretation = await callDoubaoAI(currentPrompt);
-            updateResult(aiInterpretation);
-        }
-
-        async function runBazi() {
-            const dt = document.getElementById('bazi-dt').value;
-            const gender = document.querySelector('input[name="gender"]:checked').value;
-            const genderText = gender === 'male' ? '乾造(男)' : '坤造(女)';
-            currentPrompt = `你好豆包，我的出生时间是 ${dt}，性别是 ${genderText}。请帮我进行生辰八字测算，分析我的五行平衡、流年大运以及命运格局。`;
-            
-            showResult('生辰八字测算', '<p class="animate-pulse">正在排盘中，豆包 AI 正在解析您的命理...</p>');
-            const aiInterpretation = await callDoubaoAI(currentPrompt);
-            updateResult(aiInterpretation);
-        }
-
-        async function runTarot() {
-            const deck = document.getElementById('tarot-deck');
-            const btn = document.getElementById('tarot-btn');
-            const topic = document.getElementById('tarot-topic').value;
-            
-            deck.classList.add('shuffling');
-            btn.disabled = true;
-            btn.innerText = '正在洗牌...';
-
-            setTimeout(async () => {
-                deck.classList.remove('shuffling');
-                btn.disabled = false;
-                btn.innerText = '开始翻牌';
-                
-                const drawnCards = [];
-                const tempDeck = [...TAROT_DECK];
-                for(let i = 0; i < 3; i++) {
-                    const randomIndex = Math.floor(Math.random() * tempDeck.length);
-                    drawnCards.push(tempDeck.splice(randomIndex, 1)[0]);
-                }
-                
-                const topicNames = { 'love': '关于情感', 'career': '关于事业', 'daily': '每日指引' };
-                currentPrompt = `你好豆包，我刚刚在 GUGU ART LAB 进行了塔罗牌抽选，主题是 [${topicNames[topic]}]。我抽到的三张牌分别是：1. ${drawnCards[0].name} (过去/根源), 2. ${drawnCards[1].name} (现在/现状), 3. ${drawnCards[2].name} (未来/结果)。请帮我分析这组牌意。`;
-
-                const initialHtml = `
-                    <div class="space-y-8">
-                        <div class="grid grid-cols-3 gap-4">
-                            ${drawnCards.map((card, idx) => {
-                                const isMajor = card.img === 'tarot5.jpg';
-                                const gridX = isMajor ? 7 : 5; // 假设大牌图 7 列，小牌图 5 列
-                                const gridY = 3; 
-                                const posX = (card.x / (gridX - 1)) * 100;
-                                const posY = (card.y / (gridY - 1)) * 100;
-
-                                return `
-                                    <div class="text-center">
-                                        <div class="w-full aspect-[2/3] border border-accent-color rounded overflow-hidden p-0 bg-white mb-2 card-placeholder">
-                                            <div class="tarot-img-crop ${isMajor ? 'img-major' : 'img-minor'}" 
-                                                 style="background-image: url('${card.img}'); 
-                                                        background-position: ${posX}% ${posY}%;">
-                                            </div>
-                                            <div class="absolute bottom-0 left-0 w-full bg-white/80 text-[8px] py-1 font-bold">
-                                                ${card.name}
-                                            </div>
-                                        </div>
-                                        <div class="text-[9px] uppercase tracking-tighter text-gray-400">
-                                            ${idx === 0 ? '过去 / 根源' : idx === 1 ? '现在 / 现状' : '未来 / 结果'}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                        <div id="ai-loading-text" class="pt-4 border-t border-dashed border-gray-300">
-                            <p class="text-sm animate-pulse">正在将牌面发送给豆包 AI 进行深度解读...</p>
-                        </div>
-                    </div>
-                `;
-
-                showResult('三牌阵塔罗解读', initialHtml);
-                const aiInterpretation = await callDoubaoAI(currentPrompt);
-                updateResult(aiInterpretation, true);
-            }, 2000);
-        }
-
-        function showResult(title, html) {
-            document.getElementById('result-title').innerText = title;
-            document.getElementById('result-text').innerHTML = html;
-            document.getElementById('result-modal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function updateResult(aiText, isTarot = false) {
-            const container = document.getElementById('result-text');
-            if (isTarot) {
-                const loadingDiv = document.getElementById('ai-loading-text');
-                if (loadingDiv) {
-                    loadingDiv.innerHTML = `<p class="text-sm font-semibold mb-2">豆包 AI 解读：</p><div class="text-sm text-gray-600 leading-relaxed">${aiText.replace(/\n/g, '<br>')}</div>`;
-                    loadingDiv.classList.remove('animate-pulse');
-                }
-            } else {
-                container.innerHTML = `<div class="text-sm text-gray-600 leading-relaxed">${aiText.replace(/\n/g, '<br>')}</div>`;
-            }
-        }
-
-        document.getElementById('copy-to-doubao').onclick = function() {
-            navigator.clipboard.writeText(currentPrompt).then(() => {
-                alert('已为您复制好给豆包的指令，您可以手动粘贴以开启更多对话。');
-                window.open('https://www.doubao.com/', '_blank');
-            });
-        };
-
-        function closeResult() {
-            document.getElementById('result-modal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    </script>
+    <script src="tarot/script.js"></script>
 </body>
 </html>

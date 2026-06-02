@@ -1,10 +1,27 @@
+function isEditableTarget(target) {
+    if (!target) return false;
+    const tag = (target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return true;
+    if (tag === 'select') return true;
+    return !!target.isContentEditable;
+}
+
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('copy', e => e.preventDefault());
-document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('copy', e => {
+    if (!isEditableTarget(e.target)) e.preventDefault();
+});
+document.addEventListener('cut', e => {
+    if (!isEditableTarget(e.target)) e.preventDefault();
+});
 
 document.addEventListener('keydown', e => {
-    if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'c' || e.key === 'C')) {
+    if (!e.ctrlKey) return;
+    if (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        return;
+    }
+    if ((e.key === 'c' || e.key === 'C') && !isEditableTarget(e.target)) {
         e.preventDefault();
     }
 });
@@ -642,6 +659,205 @@ function summarizeMeaning(text) {
     return text.split(/[、,，]/).map(s => s.trim()).filter(Boolean).slice(0, 3).join('、');
 }
 
+function conceptSummaryFromMeaning(text, card, langKey) {
+    const raw = String(text || '');
+    const s = raw.toLowerCase();
+    const key = langKey || 'zh';
+
+    const zhRules = [
+        { re: /活在过去|怀旧|过去的影子/, phrase: '旧事牵扯' },
+        { re: /不成熟|幼稚|不够成熟/, phrase: '还没真正定型' },
+        { re: /需要放下|放下|结束|告别|离开/, phrase: '该把手松开' },
+        { re: /探索|发现|学习|好奇/, phrase: '愿意重新尝试' },
+        { re: /热情|动力|行动|冲劲|能量/, phrase: '行动力回温' },
+        { re: /信使|消息|沟通|表达/, phrase: '有讯号在靠近' },
+        { re: /转机|机会|突破|新开始/, phrase: '出现转折口' },
+        { re: /界限|自律|控制|耐心|平衡/, phrase: '需要稳住边界' },
+        { re: /焦虑|担忧|恐惧|不安/, phrase: '内心容易紧绷' },
+        { re: /冲突|争执|竞争/, phrase: '外界摩擦增多' },
+        { re: /延迟|等待|停滞/, phrase: '节奏会放慢' },
+        { re: /成功|胜利|认可|成就/, phrase: '更容易被看见' },
+        { re: /贪婪|不满|空虚/, phrase: '容易越想越不够' },
+        { re: /物质主义|金钱|资源|利益/, phrase: '把价值绑在结果上' },
+        { re: /依赖|成瘾|束缚/, phrase: '有黏住的惯性' }
+    ];
+
+    const enRules = [
+        { re: /past|nostalg|memory/, phrase: 'pulled by the past' },
+        { re: /immature|naive|inexperience/, phrase: 'still forming' },
+        { re: /let go|release|endings?/, phrase: 'time to loosen your grip' },
+        { re: /explor|discover|learn|curious/, phrase: 'ready to try again' },
+        { re: /passion|drive|action|energy/, phrase: 'momentum returns' },
+        { re: /message|communicat|signal/, phrase: 'signals come in' },
+        { re: /opportun|turning point|breakthrough|new start/, phrase: 'a turning point opens' },
+        { re: /boundar|discipline|balance|patience/, phrase: 'hold your boundaries' },
+        { re: /anxiet|worry|fear/, phrase: 'nervous tension rises' },
+        { re: /conflict|argument|competition/, phrase: 'friction increases' },
+        { re: /delay|wait|stuck/, phrase: 'the pace slows' },
+        { re: /success|victory|recognition|achievement/, phrase: 'visibility increases' },
+        { re: /greed|dissatisfaction|empty/, phrase: 'the “not enough” loop' },
+        { re: /material|money|resource|profit/, phrase: 'tying worth to outcomes' },
+        { re: /attachment|addiction|bondage/, phrase: 'sticky patterns' }
+    ];
+
+    const rules = key === 'en' ? enRules : zhRules;
+    const picked = [];
+    for (const r of rules) {
+        if (picked.length >= 2) break;
+        if (r.re.test(s) && !picked.includes(r.phrase)) picked.push(r.phrase);
+    }
+
+    if (picked.length) return picked.join(key === 'en' ? ', ' : '、');
+
+    if (!card) return key === 'en' ? 'a subtle inner shift' : '一种微妙的内在转向';
+    if (card.isReversed) return key === 'en' ? 'a quieter, more inward friction' : '更偏向内在的卡点';
+    return key === 'en' ? 'a clearer, more workable flow' : '更容易推进的能量';
+}
+
+function detectQuestionTheme(question, langKey) {
+    const q = String(question || '').trim();
+    if (!q) return 'general';
+    const s = q.toLowerCase();
+    const key = langKey || 'zh';
+
+    if (key === 'en') {
+        if (/(career|job|work|promotion|boss|interview|resign|startup|business|offer)/i.test(s)) return 'career';
+        if (/(love|relationship|dating|partner|crush|ex|marriage|breakup)/i.test(s)) return 'love';
+        if (/(money|finance|salary|income|investment|stock|debt|rent|budget)/i.test(s)) return 'finance';
+        if (/(health|sleep|anxiety|stress|body|therapy|healing)/i.test(s)) return 'health';
+        if (/(study|exam|school|university|grade|thesis)/i.test(s)) return 'study';
+        return 'general';
+    }
+
+    if (/(事业|工作|升职|加薪|跳槽|离职|转职|面试|offer|老板|同事|客户|创业|项目|绩效|职场)/.test(q)) return 'career';
+    if (/(感情|爱情|恋爱|关系|对象|暧昧|前任|复合|结婚|离婚|分手|喜欢谁|他|她)/.test(q)) return 'love';
+    if (/(财|钱|收入|投资|股票|基金|债|贷款|房租|预算|生意|资源|订单)/.test(q)) return 'finance';
+    if (/(健康|身体|睡眠|焦虑|压力|抑郁|情绪|疗愈|病|疼|恢复)/.test(q)) return 'health';
+    if (/(学业|考试|学校|论文|绩点|上岸|考研|留学)/.test(q)) return 'study';
+    return 'general';
+}
+
+function getQuestionContext(question, langKey) {
+    const theme = detectQuestionTheme(question, langKey);
+    const key = langKey || 'zh';
+
+    if (key === 'en') {
+        if (theme === 'career') {
+            return {
+                theme,
+                scope: 'in your career/work context, ',
+                guidance: [
+                    'Translate the insight into one concrete action: one message, one application, one conversation, one deliverable.',
+                    'Focus on what you can influence today: your output, your boundaries, and your pacing.',
+                    'Don’t overidentify with results. Treat this as skill-building and positioning, not self-worth.'
+                ]
+            };
+        }
+        if (theme === 'love') {
+            return {
+                theme,
+                scope: 'in your relationship context, ',
+                guidance: [
+                    'Choose clarity over guessing. Say one honest sentence instead of testing the other person.',
+                    'Let boundaries be loving. If it’s a yes, it will survive a clear “no” to what drains you.',
+                    'Don’t chase intensity. Look for consistency and emotional safety.'
+                ]
+            };
+        }
+        if (theme === 'finance') {
+            return {
+                theme,
+                scope: 'in your money/resources context, ',
+                guidance: [
+                    'Keep it practical: check cashflow, terms, and hidden costs before committing.',
+                    'Avoid “all in” thinking. Protect your downside first, then expand.',
+                    'Make decisions from clarity, not urgency or comparison.'
+                ]
+            };
+        }
+        if (theme === 'health') {
+            return {
+                theme,
+                scope: 'in your wellbeing context, ',
+                guidance: [
+                    'Your body is the metric. Prioritize rest, hydration, and a calmer rhythm.',
+                    'Name the feeling before you fix it. The right change is often smaller than you think.',
+                    'Gentle consistency beats dramatic resets.'
+                ]
+            };
+        }
+        if (theme === 'study') {
+            return {
+                theme,
+                scope: 'in your study/exam context, ',
+                guidance: [
+                    'Break it down: one topic, one page, one practice set. Momentum comes from small wins.',
+                    'Study in blocks and protect your attention. Consistency matters more than mood.',
+                    'Ask for feedback early instead of perfecting in isolation.'
+                ]
+            };
+        }
+        return { theme, scope: '', guidance: ['Keep it simple. Focus on what you can control today.'] };
+    }
+
+    if (theme === 'career') {
+        return {
+            theme,
+            scope: '放在事业/工作上看，',
+            guidance: [
+                '把这份解读落到一个具体动作：发一封讯息、投一份简历、约一次沟通、推进一个交付。',
+                '今天只抓你能掌控的三件事：产出、界限、节奏。',
+                '别把结果当成自我价值评估，先把自己放在“练功与布局”的位置。'
+            ]
+        };
+    }
+    if (theme === 'love') {
+        return {
+            theme,
+            scope: '放在感情/关系上看，',
+            guidance: [
+                '用清晰替代猜测：说一句真话，比反复试探更有力量。',
+                '界限不等于冷淡，它是在告诉对方：什么是你愿意长期生活的方式。',
+                '别追强烈，去看稳定：对方是否能持续回应、持续在场。'
+            ]
+        };
+    }
+    if (theme === 'finance') {
+        return {
+            theme,
+            scope: '放在金钱/资源上看，',
+            guidance: [
+                '先看现实面：现金流、条款、隐性成本，再谈期待与愿景。',
+                '先保下限再扩张，别被“一把梭”带走判断。',
+                '用清醒做决定，不用焦虑、攀比或紧迫感做决定。'
+            ]
+        };
+    }
+    if (theme === 'health') {
+        return {
+            theme,
+            scope: '放在身心状态上看，',
+            guidance: [
+                '身体就是指标：休息、喝水、慢一点的节奏，会比硬撑更有效。',
+                '先命名感受，再处理问题；很多改变其实不需要很大。',
+                '温柔的持续，比激烈的重启更管用。'
+            ]
+        };
+    }
+    if (theme === 'study') {
+        return {
+            theme,
+            scope: '放在学业/考试上看，',
+            guidance: [
+                '把目标切成小块：一页、一题、一轮练习，先把手感找回来。',
+                '用时间块保护注意力；稳定比心情更重要。',
+                '早点要反馈，不要一个人憋到完美。'
+            ]
+        };
+    }
+    return { theme, scope: '', guidance: ['把重心放回当下：先做你能掌控的最小一步。'] };
+}
+
 function toneScore(card) {
     const base = card.isReversed ? -1 : 1;
     const majorBonus = card.arcana === 'major' ? 0.2 : 0;
@@ -711,32 +927,90 @@ function renderReadingCards(config, cards) {
     container.innerHTML = cardHtml;
 }
 
-function buildTimelineConclusion(cards) {
+function buildTimelineConclusion(cards, meta) {
     const past = cards[0];
     const present = cards[1];
     const future = cards[2];
     const reversedCount = cards.filter(c => c.isReversed).length;
 
-    const pastKey = summarizeMeaning(meaningFor(past));
-    const presentKey = summarizeMeaning(meaningFor(present));
-    const futureKey = summarizeMeaning(meaningFor(future));
-    const pastName = getReadingCardName(past);
-    const presentName = getReadingCardName(present);
-    const futureName = getReadingCardName(future);
+    const pastHint = conceptSummaryFromMeaning(meaningFor(past), past, currentLang);
+    const presentHint = conceptSummaryFromMeaning(meaningFor(present), present, currentLang);
+    const futureHint = conceptSummaryFromMeaning(meaningFor(future), future, currentLang);
+    const q = meta && meta.question ? String(meta.question).trim() : '';
+    const ctx = getQuestionContext(q, currentLang);
+    const seed = hashSeed(`${q}|${past.arcana}:${past.suit || ''}:${past.id}:${past.isReversed ? 'R' : 'U'}|${present.arcana}:${present.suit || ''}:${present.id}:${present.isReversed ? 'R' : 'U'}|${future.arcana}:${future.suit || ''}:${future.id}:${future.isReversed ? 'R' : 'U'}`);
 
     if (currentLang === 'en') {
         const reversedNote = reversedCount
             ? `You drew ${reversedCount} reversed card(s). Read them as friction points: where energy is blocked, delayed, or needs a different approach.`
             : `Most cards are upright, so the overall flow is smoother. The outcome depends on how consistently you act on the “present” message.`;
 
-        return `${reversedNote}<br><br>This spread reads like a causal chain rather than three separate meanings. The Past card (${pastName}, ${orientationText(past)}) sets the root pattern: ${pastKey}. It explains what you’ve been carrying, repeating, or reacting to. The Present card (${presentName}, ${orientationText(present)}) highlights your current strategy and pressure point: ${presentKey}. It’s the lever you can actually move right now—your boundaries, pacing, communication, or commitment. The Future card (${futureName}, ${orientationText(future)}) shows a direction, not a verdict: ${futureKey}. If you keep responding from the Present pattern, the situation naturally drifts toward that energy. A practical way to link all three is to turn them into one sentence: because of ${pastKey}, I must handle the present with ${presentKey}, so the path can open toward ${futureKey}.`;
+        const qPrefix = q ? `About “${q}”, ` : '';
+        const scope = ctx.scope || '';
+        const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 17) : '';
+
+        const pastTemplates = [
+            `${qPrefix}${scope}the past sets the baseline: ${pastHint}. It explains what your nervous system defaults to.`,
+            `${qPrefix}${scope}the story starts in ${pastHint}—an old atmosphere that colors how you read everything else.`,
+            `${qPrefix}${scope}the root layer is ${pastHint}. That’s the lens you’ve been using, even if quietly.`
+        ];
+        const presentTemplates = [
+            `Now, when ${pastHint} meets ${presentHint}, the tone shifts. ${scope}this is the moment you respond differently instead of replaying the old loop.`,
+            `In the present, ${pastHint} collides with ${presentHint}. ${scope}that’s where the “turn” happens: you can engage, experiment, and regain agency.`,
+            `Right now, the bridge is ${presentHint}. ${scope}it’s how you move out of ${pastHint} without forcing or denying what you feel.`
+        ];
+        const futureTemplates = [
+            `Next, ${presentHint} flows into ${futureHint}. ${scope}progress is possible, but it also tests restraint and self-worth.`,
+            `As this continues, the present energy tends to land in ${futureHint}. ${scope}momentum grows—and overreaching can sneak in.`,
+            `The direction points toward ${futureHint}. ${scope}it’s not a verdict—more like the weather you walk into if nothing changes.`
+        ];
+        const guidanceTemplates = [
+            `Guidance: Keep your actions anchored in ${presentHint}. Choose steady pace over intensity, and the best side of ${futureHint} shows up.${extra ? ` ${extra}` : ''}`,
+            `Guidance: Let “now” do the heavy lifting. If you act from ${presentHint}, you won’t be dragged back by ${pastHint} or pulled into the excess of ${futureHint}.${extra ? ` ${extra}` : ''}`,
+            `Guidance: Make one clean choice today that reflects ${presentHint}. That’s the simplest way to steer the story away from the shadow side of ${futureHint}.${extra ? ` ${extra}` : ''}`
+        ];
+
+        const step1 = pickFrom(pastTemplates, seed);
+        const step2 = pickFrom(presentTemplates, seed + 3);
+        const step3 = pickFrom(futureTemplates, seed + 7);
+        const step4 = pickFrom(guidanceTemplates, seed + 11);
+        return `${reversedNote}<br><br>${step1}<br><br>${step2}<br><br>${step3}<br><br>${step4}`;
     }
 
     const reversedNote = reversedCount
         ? `这次出现 ${reversedCount} 张${t().reversed}。它不是“坏”，而是把阻力点点亮：哪里卡住、哪里该换路。`
         : `这次多为${t().upright}，整体更顺。方向并不复杂，复杂的是你愿不愿意照着做。`;
 
-    return `先别急着追问结局。三张牌是一段叙事，不是三句答案。<br><br>${reversedNote}<br><br>过去位「${pastName}（${orientationText(past)}）」落在「${pastKey}」，像种子——它说明这件事当初是怎么被种下的，你为何会带着同一套惯性走到今天。现在位「${presentName}（${orientationText(present)}）」落在「${presentKey}」，像你手里的动作——你当下怎么回应、怎么说、怎么取舍、怎么立界限，决定局面会不会开始转向。未来位「${futureName}（${orientationText(future)}）」落在「${futureKey}」，像潮水的方向——它不是判决，只是趋势：你沿着现在的处理方式继续走，它就会自然流向那股能量。把三张牌连成一句就好：因为「${pastKey}」，所以现在要用「${presentKey}」去应对，局面才更可能走向「${futureKey}」。`;
+    const qPrefix = q ? `围绕你问的「${q}」，` : '';
+    const scope = ctx.scope || '';
+    const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 17) : '';
+
+    const pastTemplates = [
+        `${qPrefix}${scope}过去更像是一层底色：${pastHint}。它解释了你为什么会用某一种熟悉的方式去理解这件事。`,
+        `${qPrefix}${scope}过去带着 ${pastHint} 的气味。你不一定在“做错”，只是很自然地沿用了旧的反应模式。`,
+        `${qPrefix}${scope}这件事的根部在 ${pastHint}。那是一种你很熟、也很容易自动启动的状态。`
+    ];
+    const presentTemplates = [
+        `现在是转折点：当 ${pastHint} 遇上 ${presentHint}，你开始换一种处理方式。${scope}不是硬推，而是愿意再试一次。`,
+        `现在这张牌把你往 ${presentHint} 拉了一下：你在从 ${pastHint} 里抽身。${scope}你开始更主动、更清醒地参与。`,
+        `现在的关键在 ${presentHint}。${scope}它让你不必继续困在 ${pastHint}，而是用更可执行的方式把局面往前带。`
+    ];
+    const futureTemplates = [
+        `未来会更容易落在 ${futureHint}。${scope}推进会有，但它会考验你：你是稳稳地走，还是被“想要更快更好”的心推着跑。`,
+        `未来的方向指向 ${futureHint}。${scope}它像提醒：机会在，但也容易出现不满足、过度用力或把价值绑在结果上。`,
+        `未来走向是 ${futureHint}。${scope}它不是判决，更像一个提示：如果现在继续这样处理，下一步大概率会走到这里。`
+    ];
+    const guidanceTemplates = [
+        `建议：把力量收回到“现在”。用 ${presentHint} 的方式去做事、去说话、去设定节奏与界限，你就更不容易被 ${futureHint} 的陷阱带偏。${extra ? `${extra}` : ''}`,
+        `建议：今天不要追求一次到位。抓住 ${presentHint} 这个当下动作，未来就更可能呈现 ${futureHint} 的“清醒那一面”，而不是焦虑与过度。${extra ? `${extra}` : ''}`,
+        `建议：你只要做一件事——让当下更像 ${presentHint}。这会自然把你从 ${pastHint} 往外带，也会让未来的 ${futureHint} 更稳、更不失控。${extra ? `${extra}` : ''}`
+    ];
+
+    const step1 = pickFrom(pastTemplates, seed);
+    const step2 = pickFrom(presentTemplates, seed + 3);
+    const step3 = pickFrom(futureTemplates, seed + 7);
+    const step4 = pickFrom(guidanceTemplates, seed + 11);
+    return `${reversedNote}<br><br>${step1}<br><br>${step2}<br><br>${step3}<br><br>${step4}`;
 }
 
 function buildChoiceConclusion(cards, meta) {
@@ -745,6 +1019,9 @@ function buildChoiceConclusion(cards, meta) {
 
     const aKey = summarizeMeaning(meaningFor(a));
     const bKey = summarizeMeaning(meaningFor(b));
+    const q = meta && meta.question ? String(meta.question).trim() : '';
+    const ctx = getQuestionContext(q, currentLang);
+    const seed = hashSeed(`${q}|${a.arcana}:${a.suit || ''}:${a.id}:${a.isReversed ? 'R' : 'U'}|${b.arcana}:${b.suit || ''}:${b.id}:${b.isReversed ? 'R' : 'U'}`);
 
     const scoreA = toneScore(a);
     const scoreB = toneScore(b);
@@ -758,9 +1035,12 @@ function buildChoiceConclusion(cards, meta) {
         const reversedNote = reversedCount
             ? `There is ${reversedCount} reversed card in this spread. Treat it as “hidden cost” or an internal hesitation that needs clarity.`
             : `Both cards are mostly upright, so the decision is less about “good vs bad” and more about alignment and timing.`;
+        const qPrefix = q ? `About “${q}”, ` : '';
+        const scope = ctx.scope || '';
+        const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 19) : '';
 
         if (Math.abs(scoreA - scoreB) < 0.25) {
-            return `${reversedNote}<br><br>The energy is very balanced: ${labelA} leans toward ${aKey}, while ${labelB} leans toward ${bKey}. When the spread is this close, the deciding factor is your value hierarchy. Ask yourself: which option supports the life you want to build in 6–12 months, and which one only feels urgent right now? Write down the long-term costs (time, emotional load, learning curve, money), then pick the cost you are willing to pay. The “right” option is the one whose cost you can sustain without resenting yourself later.`;
+            return `${reversedNote}<br><br>${qPrefix}${scope}If you choose ${labelA}, the situation leans toward ${aKey}. If you choose ${labelB}, it leans toward ${bKey}. The energies are very close, so the best choice is the one whose cost you can carry consistently. Pick the option that supports your next 6–12 months, not just what feels urgent today.${extra ? ` ${extra}` : ''}`;
         }
 
         const pickA = scoreA > scoreB;
@@ -772,7 +1052,7 @@ function buildChoiceConclusion(cards, meta) {
         const preferredName = pickA ? aName : bName;
         const otherName = pickA ? bName : aName;
 
-        return `${reversedNote}<br><br>More supportive direction: ${preferred}. Its card (${preferredName}, ${orientationText(preferredCard)}) points to ${preferredKey}, suggesting smoother momentum if you commit and act. The other option is not “wrong”; it carries the theme of ${otherKey} (${otherName}, ${orientationText(otherCard)}), which may require extra negotiation, patience, or inner work. A clean way to decide is to translate the two cards into conditions: choose ${preferred} if you can lean into ${preferredKey} in daily actions; choose the other if you are ready to face and resolve its hidden friction first.`;
+        return `${reversedNote}<br><br>${qPrefix}${scope}${labelA}: ${aKey}. ${labelB}: ${bKey}. More supportive direction: ${preferred}. It tends to move with ${preferredKey} more smoothly when you commit and act, while the other path carries more of ${otherKey} and may ask for extra negotiation, patience, or inner work. If you want cleaner momentum today, lean toward ${preferred}.${extra ? ` ${extra}` : ''}`;
     }
 
     if (Math.abs(scoreA - scoreB) < 0.25) {
@@ -783,8 +1063,11 @@ function buildChoiceConclusion(cards, meta) {
 
         const labelA = meta.choiceA || '选择 A';
         const labelB = meta.choiceB || '选择 B';
+        const qPrefix = q ? `围绕你问的「${q}」，` : '';
+        const scope = ctx.scope || '';
+        const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 19) : '';
 
-        return `${reversedNote}<br><br>两张牌像两条路：${labelA} 更靠近「${aKey}」，${labelB} 更像「${bKey}」。当它们势均力敌时，塔罗其实在问你：你愿意承担哪一种代价？把两边的长期成本写出来——时间、金钱、精力、情绪负担、学习曲线、人际牵扯。然后选那个“你能持续付出、也不会在未来怨自己”的版本。选择一旦清楚，路就会自己亮起来。`;
+        return `${reversedNote}<br><br>${qPrefix}${scope}${labelA} 这条路更像「${aKey}」，${labelB} 更靠近「${bKey}」。两边势均力敌时，就别用“对不对”来选，用“我愿意长期承担哪一种代价”来选。把两边的时间、金钱、精力、情绪负担写出来，选那个你能持续投入、也不会在未来怨自己的版本。${extra ? `${extra}` : ''}`;
     }
 
     const pickA = scoreA > scoreB;
@@ -800,8 +1083,11 @@ function buildChoiceConclusion(cards, meta) {
     const reversedNote = reversedCount
         ? `这组牌里出现 ${reversedCount} 张${t().reversed}。说明你并不是没有方向，而是有顾虑：信息不完整、边界不清，或心里还在拉扯。`
         : `这组牌整体很清楚：你已经具备做决定的条件。剩下的，是把选择落地。`;
+    const qPrefix = q ? `围绕你问的「${q}」，` : '';
+    const scope = ctx.scope || '';
+    const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 19) : '';
 
-    return `${reversedNote}<br><br>更倾向 ${pickLabel}：它对应的牌是「${pickName}（${orientationText(pickCard)}）」，关键词更靠近「${pickKey}」。这条路更像“走得动”的路：你做一步，就会有一步的回声。另一个选项 ${otherLabel} 的牌「${otherName}（${orientationText(otherCard)}）」更像「${otherKey}」，它不一定更差，但通常要先处理一个前置条件——先谈清楚、先等成熟、或先把自己收回来。把两张牌当成两条执行方式：选 ${pickLabel}，就每天用「${pickKey}」去做一件小事；选 ${otherLabel}，就先把「${otherKey}」背后的结解开。你会发现，真正消耗你的不是选择，而是迟迟不开始。`;
+    return `${reversedNote}<br><br>${qPrefix}${scope}${pickLabel}：更像「${pickKey}」，比较容易推进；${otherLabel}：更像「${otherKey}」，通常需要先谈清楚或先处理一个前置条件。若你想要今天就出现更顺的回音，可以优先走 ${pickLabel}。关键不是选完就结束，而是把选择落到行动：用「${pickKey}」的方式去做一件具体的小事，局面会跟着动起来。${extra ? `${extra}` : ''}`;
 }
 
 function buildDailyConclusion(card) {
@@ -871,10 +1157,10 @@ function buildDailyConclusion(card) {
         : pickFrom(luckyTipsZh, seed + 11);
 
     if (currentLang === 'en') {
-        return `Card: ${name} (${orientationText(card)})<br><br>Today’s vibe: ${focus}. The keyword sits on ${key}—keep it simple and let the day respond.<br><br>Lucky item: ${luckyItem}<br>Lucky number: ${luckyNumber}<br>Watch out: ${caution}<br>Note: ${tip}`;
+        return `Card: ${name} (${orientationText(card)})<br><br>Today’s vibe: ${focus}. The keyword sits on ${key}—keep it simple and let the day respond.<br><br>Lucky item: ${luckyItem}<br>Lucky number: ${luckyNumber}<br>Watch out: ${caution}<br>Note: ${tip}<br><br>Takeaway: Keep ${key} as your anchor today. Focus on the smallest controllable step and let the rest unfold.`;
     }
 
-    return `今日牌：${name}（${orientationText(card)}）<br><br>今日运势：${focus}。关键词落在「${key}」，今天别把自己拉太满，让事情自然回音。<br><br>幸运物：${luckyItem}<br>幸运号码：${luckyNumber}<br>注意事项：${caution}<br>小提醒：${tip}`;
+    return `今日牌：${name}（${orientationText(card)}）<br><br>今日运势：${focus}。关键词落在「${key}」，今天别把自己拉太满，让事情自然回音。<br><br>幸运物：${luckyItem}<br>幸运号码：${luckyNumber}<br>注意事项：${caution}<br>小提醒：${tip}<br><br>今日提醒：把「${key}」当成今天的锚点，先做你能掌控的最小一步。剩下的别硬推，让它顺着你的节奏展开。`;
 }
 
 function hashSeed(str) {
@@ -958,7 +1244,7 @@ function renderReadingAnalysis(config, cards, meta) {
     }).join('');
 
     let conclusion = '';
-    if (config.key === 'timeline') conclusion = buildTimelineConclusion(cards);
+    if (config.key === 'timeline') conclusion = buildTimelineConclusion(cards, meta);
     if (config.key === 'choice') conclusion = buildChoiceConclusion(cards, meta);
     if (config.key === 'daily') conclusion = buildDailyConclusion(cards[0]);
 
