@@ -714,6 +714,205 @@ function conceptSummaryFromMeaning(text, card, langKey) {
     return key === 'en' ? 'a clearer, more workable flow' : '更容易推进的能量';
 }
 
+function extractMeaningTokens(text, langKey) {
+    const raw = String(text || '').trim();
+    if (!raw) return [];
+    const key = langKey || 'zh';
+    const parts = key === 'en'
+        ? raw.split(/[,，、/]/g)
+        : raw.split(/[、,，]/g);
+    return parts.map(s => String(s || '').trim()).filter(Boolean);
+}
+
+function rewriteToken(token, langKey) {
+    const key = langKey || 'zh';
+    const tkn = String(token || '').trim();
+    if (!tkn) return '';
+
+    const zhMap = {
+        '新的开始': '新的入口',
+        '新开始': '新的入口',
+        '冒险': '迈出一步',
+        '天真': '更轻的心',
+        '自由': '更松的空间',
+        '自发性': '随心的行动',
+        '意志力': '执行力',
+        '技能': '手上功夫',
+        '专注': '把视线收拢',
+        '创造力': '灵感在冒头',
+        '自信': '底气',
+        '直觉': '内在雷达',
+        '神秘': '看不见的线索',
+        '智慧': '更深的明白',
+        '丰饶': '滋养与增长',
+        '母性': '照料与包容',
+        '自然': '顺其自然的力量',
+        '权威': '掌舵感',
+        '结构': '秩序感',
+        '稳定': '能站得住的底盘',
+        '传统': '旧规则',
+        '教育': '被指引或被训练',
+        '爱情': '靠近与连结',
+        '和谐': '彼此对齐',
+        '选择': '关键取舍',
+        '胜利': '顺势推进',
+        '决心': '不退的意志',
+        '行动': '往前走',
+        '勇气': '敢面对',
+        '耐心': '慢慢来',
+        '内省': '把目光收回',
+        '转折点': '命运拐点',
+        '变化': '节奏转换',
+        '公正': '公平与取证',
+        '真理': '看清事实',
+        '放手': '松开执着',
+        '等待': '先按住',
+        '结束': '阶段完结',
+        '转变': '换轨',
+        '重生': '重新出发',
+        '平衡': '拿捏分寸',
+        '适度': '不过量',
+        '束缚': '被卡住的惯性',
+        '成瘾': '离不开的东西',
+        '物质主义': '把价值放在外在',
+        '突变': '突然翻盘',
+        '觉醒': '一下看懂',
+        '破坏': '旧结构松动',
+        '希望': '亮点与修复',
+        '宁静': '心里回到安静',
+        '幻觉': '雾气与不确定',
+        '恐惧': '心里发紧',
+        '焦虑': '脑内过载',
+        '成功': '被看见与落地',
+        '欢乐': '心气上扬',
+        '清晰': '线条变清楚',
+        '审判': '回到良知',
+        '完成': '闭环',
+        '成就': '阶段成果',
+        '怀旧': '回忆拉扯',
+        '童年': '旧时感受',
+        '纯真': '更软的心',
+        '给予': '愿意付出',
+        '活在过去': '被旧事牵着',
+        '不成熟': '还在长大',
+        '需要放下': '该松手了',
+        '探索': '试探与摸索',
+        '热情': '火苗回来了',
+        '发现': '看见新的可能',
+        '信使': '讯息与动向',
+        '满足': '心里有余',
+        '愿望成真': '愿望落地',
+        '感恩': '珍惜现有',
+        '快乐': '心情回暖',
+        '贪婪': '想要更多',
+        '不满': '怎么都不够',
+        '突破': '撕开口子',
+        '困惑': '线索散掉',
+        '休息': '暂停与修复',
+        '恢复': '慢慢回电',
+        '贫困': '资源紧',
+        '困难': '现实压力',
+        '学习': '补课与练功',
+        '勤奋': '持续打磨'
+    };
+
+    const enMap = {
+        'new beginning': 'a new entry point',
+        'new start': 'a new entry point',
+        'adventure': 'a bold step',
+        'freedom': 'more room to breathe',
+        'willpower': 'execution',
+        'skill': 'craft',
+        'focus': 'tight focus',
+        'creativity': 'fresh spark',
+        'confidence': 'quiet confidence',
+        'intuition': 'inner radar',
+        'mystery': 'hidden signals',
+        'wisdom': 'deeper knowing',
+        'authority': 'taking the helm',
+        'structure': 'a clearer structure',
+        'stability': 'a stable base',
+        'turning point': 'a pivot point',
+        'change': 'a rhythm shift',
+        'let go': 'loosen your grip',
+        'endings': 'a chapter closes',
+        'transformation': 'a change of track',
+        'rebirth': 'starting again',
+        'balance': 'better calibration',
+        'attachment': 'sticky pull',
+        'addiction': 'hard-to-drop habit',
+        'material': 'external validation',
+        'breakthrough': 'a clean breakthrough',
+        'hope': 'a small light returns',
+        'clarity': 'cleaner clarity',
+        'exploration': 'curiosity returns',
+        'passion': 'heat comes back',
+        'message': 'a signal arrives',
+        'satisfaction': 'contentment',
+        'greed': 'the “more” impulse',
+        'anxiety': 'mental overdrive'
+    };
+
+    if (key === 'en') {
+        const lower = tkn.toLowerCase();
+        if (enMap[lower]) return enMap[lower];
+        return tkn;
+    }
+
+    if (zhMap[tkn]) return zhMap[tkn];
+    return tkn;
+}
+
+function buildCardCue(card, langKey, usedTokens) {
+    const key = langKey || 'zh';
+    const used = usedTokens || new Set();
+    const tokens = extractMeaningTokens(meaningFor(card), key);
+    const stopZh = new Set(['新', '开始', '机会', '变化', '能量', '情绪', '成长']);
+    const stopEn = new Set(['new', 'the', 'a', 'an', 'and', 'of']);
+    const picked = [];
+
+    for (const tok of tokens) {
+        if (picked.length >= 2) break;
+        const rewritten = rewriteToken(tok, key);
+        const rawKey = key === 'en' ? rewritten.toLowerCase() : rewritten;
+        if (!rewritten) continue;
+        if (used.has(rawKey)) continue;
+        if (key === 'zh' && stopZh.has(rewritten)) continue;
+        if (key === 'en' && stopEn.has(rawKey)) continue;
+        picked.push(rewritten);
+        used.add(rawKey);
+    }
+
+    if (picked.length) return picked.join(key === 'en' ? ', ' : '、');
+    const fallback = conceptSummaryFromMeaning(meaningFor(card), card, key);
+    const fbKey = key === 'en' ? fallback.toLowerCase() : fallback;
+    if (!used.has(fbKey)) used.add(fbKey);
+    return fallback;
+}
+
+function normalizeOutputText(text, langKey) {
+    const key = langKey || 'zh';
+    let s = String(text || '');
+
+    s = s.replace(/[ \t]+/g, ' ');
+    s = s.replace(/ \n/g, '\n');
+    s = s.replace(/\n /g, '\n');
+
+    if (key === 'en') {
+        s = s.replace(/\s+([,.;:!?])/g, '$1');
+        s = s.replace(/([,.;:!?])([A-Za-z])/g, '$1 $2');
+        s = s.replace(/ {2,}/g, ' ');
+        return s.trim();
+    }
+
+    s = s.replace(/([\u4e00-\u9fff])\s+([\u4e00-\u9fff])/g, '$1$2');
+    s = s.replace(/\s+([，。！？：；、])/g, '$1');
+    s = s.replace(/([，。！？：；、])\s+/g, '$1');
+    s = s.replace(/「\s+/g, '「').replace(/\s+」/g, '」');
+    s = s.replace(/“\s+/g, '“').replace(/\s+”/g, '”');
+    return s.trim();
+}
+
 function detectQuestionTheme(question, langKey) {
     const q = String(question || '').trim();
     if (!q) return 'general';
@@ -933,84 +1132,35 @@ function buildTimelineConclusion(cards, meta) {
     const future = cards[2];
     const reversedCount = cards.filter(c => c.isReversed).length;
 
-    const pastHint = conceptSummaryFromMeaning(meaningFor(past), past, currentLang);
-    const presentHint = conceptSummaryFromMeaning(meaningFor(present), present, currentLang);
-    const futureHint = conceptSummaryFromMeaning(meaningFor(future), future, currentLang);
+    const usedTokens = new Set();
+    const pastHint = buildCardCue(past, currentLang, usedTokens);
+    const presentHint = buildCardCue(present, currentLang, usedTokens);
+    const futureHint = buildCardCue(future, currentLang, usedTokens);
     const q = meta && meta.question ? String(meta.question).trim() : '';
     const ctx = getQuestionContext(q, currentLang);
     const seed = hashSeed(`${q}|${past.arcana}:${past.suit || ''}:${past.id}:${past.isReversed ? 'R' : 'U'}|${present.arcana}:${present.suit || ''}:${present.id}:${present.isReversed ? 'R' : 'U'}|${future.arcana}:${future.suit || ''}:${future.id}:${future.isReversed ? 'R' : 'U'}`);
 
     if (currentLang === 'en') {
-        const reversedNote = reversedCount
-            ? `You drew ${reversedCount} reversed card(s). Read them as friction points: where energy is blocked, delayed, or needs a different approach.`
-            : `Most cards are upright, so the overall flow is smoother. The outcome depends on how consistently you act on the “present” message.`;
-
-        const qPrefix = q ? `About “${q}”, ` : '';
-        const scope = ctx.scope || '';
         const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 17) : '';
-
-        const pastTemplates = [
-            `${qPrefix}${scope}the past sets the baseline: ${pastHint}. It explains what your nervous system defaults to.`,
-            `${qPrefix}${scope}the story starts in ${pastHint}—an old atmosphere that colors how you read everything else.`,
-            `${qPrefix}${scope}the root layer is ${pastHint}. That’s the lens you’ve been using, even if quietly.`
-        ];
-        const presentTemplates = [
-            `Now, when ${pastHint} meets ${presentHint}, the tone shifts. ${scope}this is the moment you respond differently instead of replaying the old loop.`,
-            `In the present, ${pastHint} collides with ${presentHint}. ${scope}that’s where the “turn” happens: you can engage, experiment, and regain agency.`,
-            `Right now, the bridge is ${presentHint}. ${scope}it’s how you move out of ${pastHint} without forcing or denying what you feel.`
-        ];
-        const futureTemplates = [
-            `Next, ${presentHint} flows into ${futureHint}. ${scope}progress is possible, but it also tests restraint and self-worth.`,
-            `As this continues, the present energy tends to land in ${futureHint}. ${scope}momentum grows—and overreaching can sneak in.`,
-            `The direction points toward ${futureHint}. ${scope}it’s not a verdict—more like the weather you walk into if nothing changes.`
-        ];
         const guidanceTemplates = [
-            `Guidance: Keep your actions anchored in ${presentHint}. Choose steady pace over intensity, and the best side of ${futureHint} shows up.${extra ? ` ${extra}` : ''}`,
-            `Guidance: Let “now” do the heavy lifting. If you act from ${presentHint}, you won’t be dragged back by ${pastHint} or pulled into the excess of ${futureHint}.${extra ? ` ${extra}` : ''}`,
-            `Guidance: Make one clean choice today that reflects ${presentHint}. That’s the simplest way to steer the story away from the shadow side of ${futureHint}.${extra ? ` ${extra}` : ''}`
+            `Guidance: Anchor your day in the “present” move. Choose consistency over intensity so the healthiest side of ${futureHint} can express itself.${extra ? ` ${extra}` : ''}`,
+            `Guidance: Keep it simple—one clean action today is enough. If you act from the present, the future won’t slide into the shadow side of ${futureHint}.${extra ? ` ${extra}` : ''}`,
+            `Guidance: Don’t try to solve everything at once. Make one concrete adjustment now; it’s the quickest way to steer away from ${futureHint}’s excess.${extra ? ` ${extra}` : ''}`
         ];
 
-        const step1 = pickFrom(pastTemplates, seed);
-        const step2 = pickFrom(presentTemplates, seed + 3);
-        const step3 = pickFrom(futureTemplates, seed + 7);
-        const step4 = pickFrom(guidanceTemplates, seed + 11);
-        return `${reversedNote}<br><br>${step1}<br><br>${step2}<br><br>${step3}<br><br>${step4}`;
+        const advice = pickFrom(guidanceTemplates, seed + 11);
+        return normalizeOutputText(advice, 'en');
     }
 
-    const reversedNote = reversedCount
-        ? `这次出现 ${reversedCount} 张${t().reversed}。它不是“坏”，而是把阻力点点亮：哪里卡住、哪里该换路。`
-        : `这次多为${t().upright}，整体更顺。方向并不复杂，复杂的是你愿不愿意照着做。`;
-
-    const qPrefix = q ? `围绕你问的「${q}」，` : '';
-    const scope = ctx.scope || '';
     const extra = (ctx.guidance && ctx.guidance.length) ? pickFrom(ctx.guidance, seed + 17) : '';
-
-    const pastTemplates = [
-        `${qPrefix}${scope}过去更像是一层底色：${pastHint}。它解释了你为什么会用某一种熟悉的方式去理解这件事。`,
-        `${qPrefix}${scope}过去带着 ${pastHint} 的气味。你不一定在“做错”，只是很自然地沿用了旧的反应模式。`,
-        `${qPrefix}${scope}这件事的根部在 ${pastHint}。那是一种你很熟、也很容易自动启动的状态。`
-    ];
-    const presentTemplates = [
-        `现在是转折点：当 ${pastHint} 遇上 ${presentHint}，你开始换一种处理方式。${scope}不是硬推，而是愿意再试一次。`,
-        `现在这张牌把你往 ${presentHint} 拉了一下：你在从 ${pastHint} 里抽身。${scope}你开始更主动、更清醒地参与。`,
-        `现在的关键在 ${presentHint}。${scope}它让你不必继续困在 ${pastHint}，而是用更可执行的方式把局面往前带。`
-    ];
-    const futureTemplates = [
-        `未来会更容易落在 ${futureHint}。${scope}推进会有，但它会考验你：你是稳稳地走，还是被“想要更快更好”的心推着跑。`,
-        `未来的方向指向 ${futureHint}。${scope}它像提醒：机会在，但也容易出现不满足、过度用力或把价值绑在结果上。`,
-        `未来走向是 ${futureHint}。${scope}它不是判决，更像一个提示：如果现在继续这样处理，下一步大概率会走到这里。`
-    ];
     const guidanceTemplates = [
-        `建议：把力量收回到“现在”。用 ${presentHint} 的方式去做事、去说话、去设定节奏与界限，你就更不容易被 ${futureHint} 的陷阱带偏。${extra ? `${extra}` : ''}`,
-        `建议：今天不要追求一次到位。抓住 ${presentHint} 这个当下动作，未来就更可能呈现 ${futureHint} 的“清醒那一面”，而不是焦虑与过度。${extra ? `${extra}` : ''}`,
-        `建议：你只要做一件事——让当下更像 ${presentHint}。这会自然把你从 ${pastHint} 往外带，也会让未来的 ${futureHint} 更稳、更不失控。${extra ? `${extra}` : ''}`
+        `建议：别把三张牌当三段结论，把它当一条路。今天只要抓住“现在”这一小步，就能把未来从${futureHint}的陷阱里拉回来。${extra ? `${extra}` : ''}`,
+        `建议：把力气放在“当下可执行”的动作上。你越能稳定地做对一件事，未来越不容易滑向${futureHint}那种失控感。${extra ? `${extra}` : ''}`,
+        `建议：别急着一次解决所有。先让自己在现在站稳，再去谈更大的结果；这样未来呈现的会是${futureHint}更清醒、更可控的那一面。${extra ? `${extra}` : ''}`
     ];
 
-    const step1 = pickFrom(pastTemplates, seed);
-    const step2 = pickFrom(presentTemplates, seed + 3);
-    const step3 = pickFrom(futureTemplates, seed + 7);
-    const step4 = pickFrom(guidanceTemplates, seed + 11);
-    return `${reversedNote}<br><br>${step1}<br><br>${step2}<br><br>${step3}<br><br>${step4}`;
+    const advice = pickFrom(guidanceTemplates, seed + 11);
+    return normalizeOutputText(advice, 'zh');
 }
 
 function buildChoiceConclusion(cards, meta) {
