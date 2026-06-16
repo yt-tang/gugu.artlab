@@ -462,6 +462,121 @@ header .lang-toggle {
     display: block;
 }
 
+.spreads-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+}
+
+@media (min-width: 860px) {
+    .spreads-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.spread-card {
+    position: relative;
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.18);
+    padding: 2.1rem 2rem;
+    overflow: hidden;
+}
+
+.spread-card.framed::before {
+    content: '';
+    position: absolute;
+    inset: -24px;
+    background-image: url("images/%E5%8D%A1%E8%83%8C.jpeg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+.spread-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.spread-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+}
+
+.spread-title {
+    font-size: 1.02rem;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+}
+
+.spread-preview {
+    position: relative;
+    width: 86px;
+    height: 72px;
+    flex: 0 0 auto;
+}
+
+.spread-card-back {
+    position: absolute;
+    width: 52px;
+    height: 72px;
+    left: 0;
+    top: 0;
+    object-fit: cover;
+    border: 1px solid rgba(196, 191, 182, 0.85);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+}
+
+.spread-meta {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+}
+
+.spread-line {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.8rem;
+    align-items: baseline;
+}
+
+.spread-k {
+    color: var(--text-light);
+    letter-spacing: 0.12em;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.spread-v {
+    color: var(--text-primary);
+    letter-spacing: 0.04em;
+    font-size: 0.92rem;
+}
+
+.spread-sub {
+    color: var(--text-secondary);
+    letter-spacing: 0.12em;
+    font-size: 0.88rem;
+    margin-bottom: 0.6rem;
+}
+
+.spread-positions ol {
+    padding-left: 1.2rem;
+    color: var(--text-primary);
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+    font-size: 0.92rem;
+}
+
+.spread-positions li + li {
+    margin-top: 0.3rem;
+}
+
 .suits-nav {
     display: flex;
     justify-content: center;

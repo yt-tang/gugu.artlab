@@ -138,8 +138,15 @@ function showArcana(type) {
     
     if (type === 'major') {
         renderMajorCards();
-    } else {
+        return;
+    }
+    if (type === 'minor') {
         showSuit(currentMinorSuit);
+        return;
+    }
+    if (type === 'spreads') {
+        renderSpreadsManual();
+        return;
     }
 }
 
@@ -150,6 +157,179 @@ function showSuit(suit) {
 }
 
 let currentMinorSuit = 'wands';
+
+function getCardBackSrc() {
+    const p = (window.location && window.location.pathname) ? window.location.pathname : '';
+    if (p.includes('/tarot/')) return 'images/卡背.jpeg';
+    return 'tarot/images/卡背.jpeg';
+}
+
+const spreadsManual = {
+    zh: [
+        {
+            title: '单牌一日运势阵',
+            fit: '每日状态、简单小事快速指引',
+            count: 1,
+            positions: ['当下整体能量 / 今日提示']
+        },
+        {
+            title: '三牌时间流（过去-现在-未来）',
+            fit: '梳理整件事发展脉络、感情/事件短期走向',
+            count: 3,
+            positions: ['过去根源', '当下现状', '短期发展结果']
+        },
+        {
+            title: '抉择二选一牌阵',
+            fit: '两难选择、两份工作/两段关系、要不要做某件事',
+            count: 5,
+            positions: ['当下整体处境', '选项A现状', '选项A结局', '选项B现状', '选项B结局']
+        },
+        {
+            title: '五牌问题剖析阵',
+            fit: '深度拆解难题、看清隐藏阻碍、外部影响',
+            count: 5,
+            positions: ['问题核心', '内在隐藏心态', '外部环境影响', '阻碍困难', '行动建议']
+        },
+        {
+            title: '感情双人关系阵',
+            fit: '暧昧、情侣、分手复合、对方内心想法',
+            count: 5,
+            positions: ['你的心态', '对方内心', '二人关系现状', '关系矛盾卡点', '关系未来走向']
+        },
+        {
+            title: '事业求职发展阵',
+            fit: '面试、工作机会、职场人际、跳槽选择',
+            count: 6,
+            positions: ['当前职场状态', '自身优势', '职场阻碍', '贵人/小人', '机会潜力', '行动建议']
+        },
+        {
+            title: '凯尔特十字经典综合阵',
+            fit: '复杂大事、长期困扰、全方位深度解读',
+            count: 10,
+            positions: ['严格遵循标准凯尔特十字 10 个固定位置释义']
+        },
+        {
+            title: '月度时间流阵（5-9月月份运势阵）',
+            fit: '预测未来连续多月生活、工作、感情走势',
+            count: 5,
+            positions: ['5月整体能量', '6月整体能量', '7月整体能量', '8月整体能量', '9月整体能量']
+        },
+        {
+            title: '人际小人风险阵',
+            fit: '判断身边人善意、是否有人背后非议、社交风险',
+            count: 4,
+            positions: ['对方真实想法', '隐藏动机', '会带来的影响', '自保建议']
+        },
+        {
+            title: '自我成长内观阵',
+            fit: '内心内耗、自我和解、看清自身执念、疗愈指引',
+            count: 4,
+            positions: ['当下内心状态', '困住你的执念', '内在力量', '疗愈放下的方法']
+        }
+    ],
+    en: [
+        {
+            title: '1-Card Daily Guidance',
+            fit: 'Daily mood, quick guidance for small matters',
+            count: 1,
+            positions: ['Overall energy / Today’s message']
+        },
+        {
+            title: '3-Card Timeline (Past–Present–Future)',
+            fit: 'Understand the flow of a situation, short-term direction',
+            count: 3,
+            positions: ['Past root', 'Present state', 'Short-term outcome']
+        },
+        {
+            title: 'Choice: A vs B',
+            fit: 'Two options, jobs/relationships, “should I do it?”',
+            count: 5,
+            positions: ['Overall context', 'Option A now', 'Option A outcome', 'Option B now', 'Option B outcome']
+        },
+        {
+            title: '5-Card Problem Breakdown',
+            fit: 'Deep analysis, hidden blocks, external influences',
+            count: 5,
+            positions: ['Core issue', 'Hidden inner state', 'External environment', 'Obstacle', 'Action advice']
+        },
+        {
+            title: '5-Card Relationship (Two People)',
+            fit: 'Crush/partners/reconciliation, their inner thoughts',
+            count: 5,
+            positions: ['Your state', 'Their state', 'Relationship now', 'Tension/block', 'Future direction']
+        },
+        {
+            title: '6-Card Career & Job',
+            fit: 'Interviews, work opportunities, workplace dynamics',
+            count: 6,
+            positions: ['Current status', 'Your strengths', 'Obstacle', 'Helpful / harmful people', 'Potential', 'Action advice']
+        },
+        {
+            title: 'Celtic Cross (Classic)',
+            fit: 'Complex matters, long-term issues, full-spectrum reading',
+            count: 10,
+            positions: ['Follow the standard 10 fixed positions of the Celtic Cross']
+        },
+        {
+            title: 'Monthly Timeline (May–Sep)',
+            fit: 'Forecast consecutive months for life/work/love',
+            count: 5,
+            positions: ['May energy', 'June energy', 'July energy', 'August energy', 'September energy']
+        },
+        {
+            title: 'Social Risk / Hidden Enemies',
+            fit: 'Assess intentions, gossip, social risk',
+            count: 4,
+            positions: ['Their true thoughts', 'Hidden motive', 'Likely impact', 'Self-protection advice']
+        },
+        {
+            title: 'Self Growth & Inner Work',
+            fit: 'Inner conflict, self-repair, healing guidance',
+            count: 4,
+            positions: ['Current inner state', 'Attachment that traps you', 'Inner strength', 'How to heal/release']
+        }
+    ]
+};
+
+function renderSpreadsManual() {
+    const container = document.getElementById('spreads-list');
+    if (!container) return;
+    const langKey = currentLang === 'en' ? 'en' : 'zh';
+    const data = spreadsManual[langKey] || spreadsManual.zh;
+    const backSrc = getCardBackSrc();
+
+    container.innerHTML = data.map((s, idx) => {
+        const title = `${idx + 1}. ${s.title}`;
+        const fit = s.fit;
+        const countValue = langKey === 'en' ? `${s.count} card${s.count > 1 ? 's' : ''}` : `${s.count}张`;
+        const posTitle = langKey === 'en' ? 'Positions' : '位置含义';
+        const fitTitle = langKey === 'en' ? 'Best for' : '适用';
+        const countTitle = langKey === 'en' ? 'Cards' : '抽牌数量';
+        const posHtml = s.positions.map(p => `<li>${p}</li>`).join('');
+
+        const previewCount = Math.min(Math.max(s.count, 1), 5);
+        const preview = Array.from({ length: previewCount }).map((_, i) => (
+            `<img src="${backSrc}" alt="" class="spread-card-back" style="transform: translateX(${i * 10}px) rotate(${i * 1.3}deg);">`
+        )).join('');
+
+        return `
+            <div class="spread-card framed">
+                <div class="spread-top">
+                    <div class="spread-title">${title}</div>
+                    <div class="spread-preview" aria-hidden="true">${preview}</div>
+                </div>
+                <div class="spread-meta">
+                    <div class="spread-line"><span class="spread-k">${fitTitle}</span><span class="spread-v">${fit}</span></div>
+                    <div class="spread-line"><span class="spread-k">${countTitle}</span><span class="spread-v">${countValue}</span></div>
+                </div>
+                <div class="spread-positions">
+                    <div class="spread-sub">${posTitle}</div>
+                    <ol>${posHtml}</ol>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
 const majorArcanaEn = {
     0: 'The Fool',
@@ -340,7 +520,8 @@ const i18n = {
         manualTitle: '塔罗手册',
         manualTabs: {
             major: '大阿卡纳 (22张)',
-            minor: '小阿卡纳 (56张)'
+            minor: '小阿卡纳 (56张)',
+            spreads: '入门牌阵'
         },
         suits: {
             wands: '权杖',
@@ -470,7 +651,8 @@ const i18n = {
         manualTitle: 'TAROT MANUAL',
         manualTabs: {
             major: 'Major Arcana (22)',
-            minor: 'Minor Arcana (56)'
+            minor: 'Minor Arcana (56)',
+            spreads: 'Spreads'
         },
         suits: {
             wands: 'Wands',
@@ -1611,8 +1793,10 @@ function syncSiteText() {
 
     const tabMajor = document.getElementById('tab-major');
     const tabMinor = document.getElementById('tab-minor');
+    const tabSpreads = document.getElementById('tab-spreads');
     if (tabMajor) tabMajor.innerText = lang.manualTabs.major;
     if (tabMinor) tabMinor.innerText = lang.manualTabs.minor;
+    if (tabSpreads) tabSpreads.innerText = lang.manualTabs.spreads;
 
     const suitWands = document.getElementById('suit-wands');
     const suitCups = document.getElementById('suit-cups');
@@ -1723,6 +1907,10 @@ function syncSiteText() {
     if (minorVisible) {
         renderMinorCards(currentMinorSuit);
         syncSuitDesc();
+    }
+    const spreadsVisible = document.getElementById('arcana-spreads')?.classList.contains('active');
+    if (spreadsVisible) {
+        renderSpreadsManual();
     }
 }
 
