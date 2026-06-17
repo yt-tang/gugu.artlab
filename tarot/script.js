@@ -158,135 +158,441 @@ function showSuit(suit) {
 
 let currentMinorSuit = 'wands';
 
-function getCardBackSrc() {
+function getSpreadsImageSrc(filename) {
     const p = (window.location && window.location.pathname) ? window.location.pathname : '';
-    if (p.includes('/tarot/')) return 'images/卡背.jpeg';
-    return 'tarot/images/卡背.jpeg';
+    const base = p.includes('/tarot/') ? '' : 'tarot/';
+    const dir = encodeURIComponent('The Spreads');
+    return `${base}images/${dir}/${encodeURIComponent(filename)}`;
 }
 
 const spreadsManual = {
     zh: [
         {
-            title: '单牌一日运势阵',
-            fit: '每日状态、简单小事快速指引',
-            count: 1,
-            positions: ['当下整体能量 / 今日提示']
-        },
-        {
-            title: '三牌时间流（过去-现在-未来）',
-            fit: '梳理整件事发展脉络、感情/事件短期走向',
+            title: 'INNER TRINITY 身心灵三元阵',
             count: 3,
-            positions: ['过去根源', '当下现状', '短期发展结果']
+            fit: '自我迷茫、情绪内耗、平衡物质、内心与自我',
+            image: 'inner Trinity.png',
+            positions: [
+                {
+                    name: '身-外在物质',
+                    desc: '代表当下现实生活、肉身状态、物质层面压力'
+                },
+                {
+                    name: '心-内心感受',
+                    desc: '代表内在情绪、潜藏执念、敏感思绪'
+                },
+                {
+                    name: '灵-灵魂高我',
+                    desc: '代表本心需求、内在自身力量、人生发展方向'
+                }
+            ]
         },
         {
-            title: '抉择二选一牌阵',
-            fit: '两难选择、两份工作/两段关系、要不要做某件事',
+            title: 'UNBLOCK MONEY 财运疏通阵',
+            count: 4,
+            fit: '求财、副业发展、理清财运卡点、发掘个人赚钱优势',
+            image: 'unblock money.png',
+            positions: [
+                {
+                    name: '最近的财运',
+                    desc: '当下整体收支情况、正财与偏财基础状态'
+                },
+                {
+                    name: '最近的机会',
+                    desc: '短期可把握的赚钱渠道、合作获利契机'
+                },
+                {
+                    name: '你的赚钱天赋',
+                    desc: '自身适配的变现赛道、独有的盈利竞争优势'
+                },
+                {
+                    name: '建议牌',
+                    desc: '改善财富状况的整体调整方向'
+                }
+            ]
+        },
+        {
+            title: 'BODY BALANCE 五行身心平衡星阵',
             count: 5,
-            positions: ['当下整体处境', '选项A现状', '选项A结局', '选项B现状', '选项B结局']
+            fit: '身心能量联动梳理，健康建议；解读仅作能量参考，不能替代就医',
+            image: 'Body balance.png',
+            positions: [
+                {
+                    name: '木-肝|胆',
+                    desc: '身体对应：肝、胆、眼睛、颈椎；情绪对应：易怒、郁闷、偏头痛相关情绪'
+                },
+                {
+                    name: '火-心|小肠',
+                    desc: '身体对应：心、小肠、全身血液循环；情绪对应：心慌、思虑过重、焦躁相关情绪'
+                },
+                {
+                    name: '土-脾|胃',
+                    desc: '身体对应：脾、胃、消化功能、肌肉状态；情绪对应：多思、乏力、低落无食欲相关情绪'
+                },
+                {
+                    name: '金-肺|大肠',
+                    desc: '身体对应：肺、呼吸道、皮肤、肠道；情绪对应：悲伤、气短、敏感脆弱相关情绪'
+                },
+                {
+                    name: '水-肾|膀胱',
+                    desc: '身体对应：肾、膀胱、腰、头发；情绪对应：疲惫畏寒、精力匮乏、消沉相关情绪'
+                }
+            ]
         },
         {
-            title: '五牌问题剖析阵',
-            fit: '深度拆解难题、看清隐藏阻碍、外部影响',
-            count: 5,
-            positions: ['问题核心', '内在隐藏心态', '外部环境影响', '阻碍困难', '行动建议']
-        },
-        {
-            title: '感情双人关系阵',
-            fit: '暧昧、情侣、分手复合、对方内心想法',
-            count: 5,
-            positions: ['你的心态', '对方内心', '二人关系现状', '关系矛盾卡点', '关系未来走向']
-        },
-        {
-            title: '事业求职发展阵',
-            fit: '面试、工作机会、职场人际、跳槽选择',
+            title: 'CAREER PYRAMID 事业金字塔阵',
             count: 6,
-            positions: ['当前职场状态', '自身优势', '职场阻碍', '贵人/小人', '机会潜力', '行动建议']
+            fit: '职场发展、求职面试、分辨贵人与小人、判断赛道留存与否',
+            image: 'career pyramid.png',
+            positions: [
+                {
+                    name: '自己',
+                    desc: '个人当下职场状态、自身能力长短板'
+                },
+                {
+                    name: '贵人',
+                    desc: '职场可提供扶持、资源机遇的人际对象'
+                },
+                {
+                    name: '小人',
+                    desc: '职场带来阻碍、消耗自身的竞争或人际'
+                },
+                {
+                    name: '希望',
+                    desc: '当前工作可获得的成长、长期收益与期待'
+                },
+                {
+                    name: '挑战',
+                    desc: '职场现存难题、外部竞争与现实压力'
+                },
+                {
+                    name: '是否坚持',
+                    desc: '综合全盘现状，给出赛道取舍参考方向'
+                }
+            ]
         },
         {
-            title: '凯尔特十字经典综合阵',
-            fit: '复杂大事、长期困扰、全方位深度解读',
-            count: 10,
-            positions: ['严格遵循标准凯尔特十字 10 个固定位置释义']
+            title: 'HEART MIRROR 心镜双人感情阵',
+            count: 7,
+            fit: '暧昧、情侣、断联复合、双方内心深度剖析',
+            image: 'Heart Mirror.png',
+            positions: [
+                {
+                    name: '对方对你的想法',
+                    desc: '对方表层直观印象、基础好感程度；对方不愿表露的深层顾虑、隐秘心思'
+                },
+                {
+                    name: '你对对方的想法',
+                    desc: '自身直观感受、对另一方的心动状态；自身藏于心底的不安、对关系的恐惧'
+                },
+                {
+                    name: '事件大概率走向',
+                    desc: '无外力干预下，关系短期自然走向'
+                }
+            ]
         },
         {
-            title: '月度时间流阵（5-9月月份运势阵）',
-            fit: '预测未来连续多月生活、工作、感情走势',
-            count: 5,
-            positions: ['5月整体能量', '6月整体能量', '7月整体能量', '8月整体能量', '9月整体能量']
+            title: 'TWO DECISION 二选一抉择阵',
+            count: 8,
+            fit: '两难抉择、两份工作/两段关系对比，分为A、B两大独立板块',
+            image: 'two Decision.png',
+            positions: [
+                {
+                    name: 'A选项',
+                    desc: '选择A的结果、局面、机遇、阻碍与建议'
+                },
+                {
+                    name: 'B选项',
+                    desc: '选择B的结果、局面、机遇、阻碍与建议'
+                }
+            ]
         },
         {
-            title: '人际小人风险阵',
-            fit: '判断身边人善意、是否有人背后非议、社交风险',
-            count: 4,
-            positions: ['对方真实想法', '隐藏动机', '会带来的影响', '自保建议']
+            title: 'BIG CROSS 大事十字综合阵',
+            count: 9,
+            fit: '重大事件、感情纠纷、人生关键抉择，梳理双方心态、事件完整脉络',
+            image: 'BiG Cross.png',
+            note: '纵向四牌（贯穿7号牌，从上至下）：5.事件的起因、6.事件的过程、8.事件的建议、9.事件的结果',
+            positions: [
+                {
+                    name: '对方的感受',
+                    desc: '事件中另一方当下的核心情绪体验'
+                },
+                {
+                    name: '对方的期待',
+                    desc: '对方在此件事里想要达成的目标、诉求'
+                },
+                {
+                    name: '事件的现在',
+                    desc: '整件事当下真实局面、核心矛盾卡点'
+                },
+                {
+                    name: '自己的感受',
+                    desc: '自身在此件事承受的情绪、心理压力'
+                },
+                {
+                    name: '自己的期待',
+                    desc: '自身想要达成的结果、对另一方的诉求'
+                },
+                {
+                    name: '事件的起因',
+                    desc: '整件矛盾、问题的根源，过往积累的隐患'
+                },
+                {
+                    name: '事件的过程',
+                    desc: '事件推进途中会经历的波折、人际拉扯'
+                },
+                {
+                    name: '事件的建议',
+                    desc: '化解整件事矛盾、推进事态的调整方向'
+                },
+                {
+                    name: '事件的结果',
+                    desc: '无外力干预下，事件最终收尾走向'
+                }
+            ]
         },
         {
-            title: '自我成长内观阵',
-            fit: '内心内耗、自我和解、看清自身执念、疗愈指引',
-            count: 4,
-            positions: ['当下内心状态', '困住你的执念', '内在力量', '疗愈放下的方法']
+            title: 'TIME MACHINES 三月时间流阵',
+            count: 9,
+            fit: '未来三个月整体运势预判，拆解每月机遇、阻碍与生活基调',
+            image: 'time machines.png',
+            positions: [
+                {
+                    name: '未来第一个月运势',
+                    desc: '当月整体状态：第一个月整体生活、工作、感情基础基调，以及机遇与阻碍'
+                },
+                {
+                    name: '未来第二个月运势',
+                    desc: '当月整体状态：第二个月整体生活、工作、感情基础基调，以及机遇与阻碍'
+                },
+                {
+                    name: '未来第三个月运势',
+                    desc: '当月整体状态：第三个月整体生活、工作、感情基础基调，以及机遇与阻碍'
+                }
+            ]
         }
     ],
     en: [
         {
-            title: '1-Card Daily Guidance',
-            fit: 'Daily mood, quick guidance for small matters',
-            count: 1,
-            positions: ['Overall energy / Today’s message']
-        },
-        {
-            title: '3-Card Timeline (Past–Present–Future)',
-            fit: 'Understand the flow of a situation, short-term direction',
+            title: 'INNER TRINITY',
             count: 3,
-            positions: ['Past root', 'Present state', 'Short-term outcome']
+            fit: 'Self-healing, inner clarity, soul growth; balance body/material, emotions, and higher self',
+            image: 'inner Trinity.png',
+            positions: [
+                {
+                    name: 'Body / Material',
+                    desc: 'Reality, physical state, material pressure and constraints; negative cards may point to fatigue, irregular routines, scarcity, or ongoing external drain'
+                },
+                {
+                    name: 'Heart / Emotions',
+                    desc: 'Subconscious feelings, emotional waves, suppressed grievances and attachments; negative cards may point to anxiety, sensitivity, imbalance, long-term mental pressure, or self-doubt'
+                },
+                {
+                    name: 'Spirit / Higher Self',
+                    desc: 'Deep truth, soul needs, real desire, inner power, life lessons and guidance; negative cards may point to losing direction, inner emptiness, or confused self-identity'
+                }
+            ]
         },
         {
-            title: 'Choice: A vs B',
-            fit: 'Two options, jobs/relationships, “should I do it?”',
+            title: 'UNBLOCK MONEY',
+            count: 4,
+            fit: 'Money flow, side income, wealth opportunities; identify blocks and an action plan',
+            image: 'unblock money.png',
+            positions: [
+                {
+                    name: 'Recent money energy',
+                    desc: 'Overall wealth tone, income stability, current gains/losses; negative cards may suggest overspending, shrinking income, cashflow stress'
+                },
+                {
+                    name: 'Recent opportunities',
+                    desc: 'Short-term channels, collaboration profit, resources from allies; negative cards may suggest fake deals, hidden costs, fleeting opportunities'
+                },
+                {
+                    name: 'Your earning talent',
+                    desc: 'Best monetization lane and unique advantage; negative cards may suggest mismatch, hard-to-monetize strengths, self-sabotaging approach'
+                },
+                {
+                    name: 'Advice',
+                    desc: 'How to unblock and protect cashflow; negative cards may suggest changing the current money pattern, reducing impulse spending, avoiding high-risk bets'
+                }
+            ]
+        },
+        {
+            title: 'BODY BALANCE',
             count: 5,
-            positions: ['Overall context', 'Option A now', 'Option A outcome', 'Option B now', 'Option B outcome']
+            fit: 'Mind-body check-in, emotional wear, energy imbalance; body signals and regulation',
+            image: 'Body balance.png',
+            positions: [
+                {
+                    name: 'Wood (Liver/Gallbladder)',
+                    desc: 'Tendons/eyes/neck and nervous tension; imbalance may show irritability, insomnia, headaches, neck soreness; negative cards may point to inflammation or anxiety'
+                },
+                {
+                    name: 'Fire (Heart/Small intestine)',
+                    desc: 'Cardio, circulation and “spirit”; imbalance may show palpitations, restlessness, poor sleep; negative cards may point to overexertion and burnout'
+                },
+                {
+                    name: 'Earth (Spleen/Stomach)',
+                    desc: 'Digestion, muscle tone; imbalance may show bloating, low appetite, swelling, fatigue; negative cards may point to dampness, gastritis, overthinking'
+                },
+                {
+                    name: 'Metal (Lungs/Large intestine)',
+                    desc: 'Respiration, skin, immunity; imbalance may show cough, allergies, constipation, low mood; negative cards may point to chronic suppression and low immunity'
+                },
+                {
+                    name: 'Water (Kidneys/Bladder)',
+                    desc: 'Bones, ears, urinary/reproductive system; imbalance may show low energy, coldness, back soreness; negative cards may point to depletion from late nights'
+                }
+            ]
         },
         {
-            title: '5-Card Problem Breakdown',
-            fit: 'Deep analysis, hidden blocks, external influences',
-            count: 5,
-            positions: ['Core issue', 'Hidden inner state', 'External environment', 'Obstacle', 'Action advice']
-        },
-        {
-            title: '5-Card Relationship (Two People)',
-            fit: 'Crush/partners/reconciliation, their inner thoughts',
-            count: 5,
-            positions: ['Your state', 'Their state', 'Relationship now', 'Tension/block', 'Future direction']
-        },
-        {
-            title: '6-Card Career & Job',
-            fit: 'Interviews, work opportunities, workplace dynamics',
+            title: 'CAREER PYRAMID',
             count: 6,
-            positions: ['Current status', 'Your strengths', 'Obstacle', 'Helpful / harmful people', 'Potential', 'Action advice']
+            fit: 'Career direction, interviews, workplace dynamics; allies vs blockers, challenges, and whether to stay',
+            image: 'career pyramid.png',
+            positions: [
+                {
+                    name: 'You',
+                    desc: 'Your current workplace state, mindset and competitiveness; negative cards may suggest inner drain, skill gaps, low momentum'
+                },
+                {
+                    name: 'Helper',
+                    desc: 'People/resources that support you; negative cards may suggest weak support or changing promises'
+                },
+                {
+                    name: 'Blocker',
+                    desc: 'Gossip, sabotage, competition, draining ties; negative cards may suggest ongoing interference'
+                },
+                {
+                    name: 'Hope',
+                    desc: 'What you want to gain and long-term upside; negative cards may suggest limited growth or unmet returns'
+                },
+                {
+                    name: 'Challenge',
+                    desc: 'Obstacles, pressure, conflicts; negative cards may suggest escalation or hard-to-solve issues'
+                },
+                {
+                    name: 'Stay or pivot',
+                    desc: 'Overall guidance on whether to keep going or change direction; upright supports staying, reversed suggests cutting losses'
+                }
+            ]
         },
         {
-            title: 'Celtic Cross (Classic)',
-            fit: 'Complex matters, long-term issues, full-spectrum reading',
-            count: 10,
-            positions: ['Follow the standard 10 fixed positions of the Celtic Cross']
+            title: 'HEART MIRROR',
+            count: 7,
+            fit: 'Love/connection deep dive: both sides’ mindsets, hidden worries, blocks and likely direction',
+            image: 'Heart Mirror.png',
+            positions: [
+                {
+                    name: 'Their surface view of you',
+                    desc: 'First impressions and daily attitude; negative cards may suggest pickiness, avoidance, or low investment'
+                },
+                {
+                    name: 'Their hidden state',
+                    desc: 'Unspoken fears, suppressed emotions, secrets; negative cards may suggest wavering, weighing pros/cons, keeping an exit'
+                },
+                {
+                    name: 'Their likely action/attitude',
+                    desc: 'How they are most likely to respond next; negative cards may suggest coldness, delay, mixed signals'
+                },
+                {
+                    name: 'Your surface view of them',
+                    desc: 'Your daily feelings and attraction; negative cards may suggest disappointment, suspicion, fading warmth'
+                },
+                {
+                    name: 'Your hidden worry',
+                    desc: 'Unspoken insecurity and fear; negative cards may suggest low safety, fear of getting hurt, urge to withdraw'
+                },
+                {
+                    name: 'Your likely action/attitude',
+                    desc: 'How you are most likely to move next; negative cards may suggest emotional decisions, on-off engagement'
+                },
+                {
+                    name: 'Most likely direction',
+                    desc: 'Where things go without outside intervention; negative cards may suggest distance, standoffs, short separations, escalating conflict'
+                }
+            ]
         },
         {
-            title: 'Monthly Timeline (May–Sep)',
-            fit: 'Forecast consecutive months for life/work/love',
-            count: 5,
-            positions: ['May energy', 'June energy', 'July energy', 'August energy', 'September energy']
+            title: 'TWO DECISION',
+            count: 8,
+            fit: 'A vs B comparison: benefits, risks, outcomes and how to choose',
+            image: 'two Decision.png',
+            positions: [
+                {
+                    name: 'A Option',
+                    desc: 'Outcome, overall situation, opportunities, obstacles, and guidance for choosing A'
+                },
+                {
+                    name: 'B Option',
+                    desc: 'Outcome, overall situation, opportunities, obstacles, and guidance for choosing B'
+                }
+            ]
         },
         {
-            title: 'Social Risk / Hidden Enemies',
-            fit: 'Assess intentions, gossip, social risk',
-            count: 4,
-            positions: ['Their true thoughts', 'Hidden motive', 'Likely impact', 'Self-protection advice']
+            title: 'BIG CROSS',
+            count: 9,
+            fit: 'Big events and complex conflicts: causes, process, current reality, advice, and likely outcome',
+            image: 'BiG Cross.png',
+            positions: [
+                {
+                    name: 'Their feelings',
+                    desc: 'Their emotional experience; negative cards may suggest resentment, anger, coldness'
+                },
+                {
+                    name: 'Their expectations',
+                    desc: 'What they want to achieve; negative cards may suggest selfish demands or unrealistic expectations'
+                },
+                {
+                    name: 'Your feelings',
+                    desc: 'Your emotional experience; negative cards may suggest exhaustion, anxiety, avoidance'
+                },
+                {
+                    name: 'Your expectations',
+                    desc: 'What you want to achieve; negative cards may suggest inner drain or unattainable goals'
+                },
+                {
+                    name: 'Cause',
+                    desc: 'Root of the issue and old patterns; negative cards may suggest deep-rooted recurring conflict'
+                },
+                {
+                    name: 'Process',
+                    desc: 'Likely twists and ongoing pull; negative cards may suggest repeated fights and prolonged drain'
+                },
+                {
+                    name: 'Present reality',
+                    desc: 'Where things truly stand now; negative cards may suggest stalemate and communication breakdown'
+                },
+                {
+                    name: 'Advice',
+                    desc: 'Best action strategy; negative cards may suggest pausing and observing'
+                },
+                {
+                    name: 'Outcome',
+                    desc: 'Likely long-term wrap-up without intervention; negative cards may suggest rupture and lasting regret'
+                }
+            ]
         },
         {
-            title: 'Self Growth & Inner Work',
-            fit: 'Inner conflict, self-repair, healing guidance',
-            count: 4,
-            positions: ['Current inner state', 'Attachment that traps you', 'Inner strength', 'How to heal/release']
+            title: 'TIME MACHINES',
+            count: 9,
+            fit: 'Three-month forecast: monthly baseline, opportunities and obstacles',
+            image: 'time machines.png',
+            positions: [
+                {
+                    name: 'Future Month One',
+                    desc: 'Overall tone of the first month, together with its opportunities and obstacles'
+                },
+                {
+                    name: 'Future Month Two',
+                    desc: 'Overall tone of the second month, together with its opportunities and obstacles'
+                },
+                {
+                    name: 'Future Month Three',
+                    desc: 'Overall tone of the third month, together with its opportunities and obstacles'
+                }
+            ]
         }
     ]
 };
@@ -296,34 +602,32 @@ function renderSpreadsManual() {
     if (!container) return;
     const langKey = currentLang === 'en' ? 'en' : 'zh';
     const data = spreadsManual[langKey] || spreadsManual.zh;
-    const backSrc = getCardBackSrc();
 
     container.innerHTML = data.map((s, idx) => {
         const title = `${idx + 1}. ${s.title}`;
         const fit = s.fit;
         const countValue = langKey === 'en' ? `${s.count} card${s.count > 1 ? 's' : ''}` : `${s.count}张`;
-        const posTitle = langKey === 'en' ? 'Positions' : '位置含义';
-        const fitTitle = langKey === 'en' ? 'Best for' : '适用';
-        const countTitle = langKey === 'en' ? 'Cards' : '抽牌数量';
-        const posHtml = s.positions.map(p => `<li>${p}</li>`).join('');
-
-        const previewCount = Math.min(Math.max(s.count, 1), 5);
-        const preview = Array.from({ length: previewCount }).map((_, i) => (
-            `<img src="${backSrc}" alt="" class="spread-card-back" style="transform: translateX(${i * 10}px) rotate(${i * 1.3}deg);">`
+        const posTitle = langKey === 'en' ? 'Positions' : '牌位理解方向';
+        const fitTitle = langKey === 'en' ? 'Best for' : '适用场景';
+        const countTitle = langKey === 'en' ? 'Cards' : '抽牌';
+        const posHtml = (s.positions || []).map((p, pIdx) => (
+            `<li><div class="spread-pos-name">${s.numbered ? `${pIdx + 1}. ` : ''}${p.name}</div><div class="spread-pos-desc">${p.desc}</div></li>`
         )).join('');
+        const imgSrc = s.image ? getSpreadsImageSrc(s.image) : '';
 
         return `
-            <div class="spread-card framed">
+            <div class="spread-card">
                 <div class="spread-top">
                     <div class="spread-title">${title}</div>
-                    <div class="spread-preview" aria-hidden="true">${preview}</div>
                 </div>
+                ${imgSrc ? `<div class="spread-hero"><img src="${imgSrc}" alt="${s.title}" class="spread-image"></div>` : ''}
                 <div class="spread-meta">
                     <div class="spread-line"><span class="spread-k">${fitTitle}</span><span class="spread-v">${fit}</span></div>
                     <div class="spread-line"><span class="spread-k">${countTitle}</span><span class="spread-v">${countValue}</span></div>
                 </div>
                 <div class="spread-positions">
                     <div class="spread-sub">${posTitle}</div>
+                    ${s.note ? `<div class="spread-note">${s.note}</div>` : ''}
                     <ol>${posHtml}</ol>
                 </div>
             </div>
@@ -652,7 +956,7 @@ const i18n = {
         manualTabs: {
             major: 'Major Arcana (22)',
             minor: 'Minor Arcana (56)',
-            spreads: 'Spreads'
+            spreads: 'The Spreads'
         },
         suits: {
             wands: 'Wands',
